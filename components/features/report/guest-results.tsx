@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Copy, Check, Lock } from "lucide-react";
 import { ScoreRing } from "@/components/features/report/score-ring";
 import { useClipboard } from "@/hooks/use-clipboard";
@@ -7,11 +9,13 @@ import { ROAST_LINES, CODE_SNIPPET, AI_REWRITTEN_HERO_COPY, DEMO_AUDIT_SCORE } f
 import type { AppView } from "@/types";
 
 interface GuestResultsProps {
-  onNavigate: (view: AppView) => void;
-  onShowModal: () => void;
+  onNavigate?: (view: AppView) => void;
+  onShowModal?: () => void;
 }
 
-export function GuestResults({ onNavigate, onShowModal }: GuestResultsProps) {
+export function GuestResults({ onNavigate: customNavigate, onShowModal }: GuestResultsProps) {
+  const router = useRouter();
+  const onNavigate = customNavigate || ((view: AppView) => router.push(`/${view === "landing" ? "" : view}`));
   const { copied, copy } = useClipboard();
 
   return (

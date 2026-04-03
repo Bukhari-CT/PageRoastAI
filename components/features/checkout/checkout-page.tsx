@@ -1,17 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Lock, CreditCard, CheckCircle, ChevronDown, Check } from "lucide-react";
 import { CHECKOUT_FEATURES } from "@/constants";
 import type { AppView, User } from "@/types";
 
 interface CheckoutPageProps {
-  user: User | null;
-  onNavigate: (view: AppView) => void;
-  onUpdateUser: (user: User) => void;
+  user?: User | null;
+  onNavigate?: (view: AppView) => void;
+  onUpdateUser?: (user: User) => void;
 }
 
-export function CheckoutPage({ user, onNavigate, onUpdateUser }: CheckoutPageProps) {
+export function CheckoutPage({ user: initialUser, onNavigate: customNavigate, onUpdateUser: customUpdateUser }: CheckoutPageProps) {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<User>(initialUser || {
+    name: "Alex Kim",
+    email: "alex@example.com",
+    role: "user",
+    plan: "free",
+    auditsUsed: 2,
+  });
+
+  const user = currentUser;
+  const onNavigate = customNavigate || ((view: AppView) => router.push(`/${view === "landing" ? "" : view}`));
+  const onUpdateUser = (newUser: User) => {
+    setCurrentUser(newUser);
+    if (customUpdateUser) customUpdateUser(newUser);
+  };
   const [paymentForm, setPaymentForm] = useState({ name: "", card: "", expiry: "", cvc: "" });
   const [billingOpen, setBillingOpen] = useState(false);
   const [success, setSuccess] = useState(false);

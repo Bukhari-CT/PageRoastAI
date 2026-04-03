@@ -1,19 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AppView, User, UserRole } from "@/types";
 
 interface LoginFormProps {
   onNavigate: (view: AppView) => void;
-  onLogin: (user: User) => void;
+  onLogin?: (user: User) => void;
 }
 
 export function LoginForm({ onNavigate, onLogin }: LoginFormProps) {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
+
+  function handleLoginSuccess(user: User) {
+    if (onLogin) onLogin(user);
+    router.push("/dashboard");
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onLogin({
+    handleLoginSuccess({
       name: "Alex Kim",
       email: form.email || "alex@example.com",
       role: "user",
@@ -26,9 +33,9 @@ export function LoginForm({ onNavigate, onLogin }: LoginFormProps) {
     if (role === "guest") {
       onNavigate("landing");
     } else if (role === "admin") {
-      onLogin({ name: "Admin", email: "admin@pageroast.com", role: "admin", plan: "agency" });
+      handleLoginSuccess({ name: "Admin", email: "admin@pageroast.com", role: "admin", plan: "agency" });
     } else {
-      onLogin({ name: "Alex Kim", email: "alex@example.com", role: "user", plan: "free", auditsUsed: 2 });
+      handleLoginSuccess({ name: "Alex Kim", email: "alex@example.com", role: "user", plan: "free", auditsUsed: 2 });
     }
   }
 

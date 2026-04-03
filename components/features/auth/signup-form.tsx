@@ -1,19 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { AppView, User } from "@/types";
 
 interface SignupFormProps {
   onNavigate: (view: AppView) => void;
-  onSignup: (user: User) => void;
+  onSignup?: (user: User) => void;
 }
 
 export function SignupForm({ onNavigate, onSignup }: SignupFormProps) {
+  const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+
+  function handleSignupSuccess(user: User) {
+    if (onSignup) onSignup(user);
+    router.push("/dashboard");
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSignup({
+    handleSignupSuccess({
       name: form.name || "Alex Kim",
       email: form.email || "alex@example.com",
       role: "user",

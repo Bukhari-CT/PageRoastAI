@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { LogOut, FileSearch, TrendingUp, CheckCircle, Zap, Users, DollarSign, Eye, Trash2, Ban, Download, Receipt, X, Lock, CheckCircle as CheckCircleIcon } from "lucide-react";
 import { AuditTable } from "@/components/features/dashboard/audit-table";
 import { ScoreRing } from "@/components/features/report/score-ring";
@@ -18,13 +19,29 @@ import {
 import type { AppView, User, UserTab, AdminTab, PlanId } from "@/types";
 
 interface DashboardShellProps {
-  user: User;
-  onNavigate: (view: AppView) => void;
-  onLogout: () => void;
-  onUpdateUser: (user: User) => void;
+  user?: User;
+  onNavigate?: (view: AppView) => void;
+  onLogout?: () => void;
+  onUpdateUser?: (user: User) => void;
 }
 
-export function DashboardShell({ user, onNavigate, onLogout, onUpdateUser }: DashboardShellProps) {
+export function DashboardShell({ user: initialUser, onNavigate: customNavigate, onLogout: customLogout, onUpdateUser: customUpdateUser }: DashboardShellProps) {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<User>(initialUser || {
+    name: "Alex Kim",
+    email: "alex@example.com",
+    role: "user",
+    plan: "free",
+    auditsUsed: 2,
+  });
+
+  const user = currentUser;
+  const onLogout = customLogout || (() => router.push("/"));
+  const onNavigate = customNavigate || ((view: AppView) => router.push(`/${view === "landing" ? "" : view}`));
+  const onUpdateUser = (newUser: User) => {
+    setCurrentUser(newUser);
+    if (customUpdateUser) customUpdateUser(newUser);
+  };
   const [userTab, setUserTab] = useState<UserTab>("dashboard");
   const [adminTab, setAdminTab] = useState<AdminTab>("dashboard");
   const [auditUrl, setAuditUrl] = useState("");

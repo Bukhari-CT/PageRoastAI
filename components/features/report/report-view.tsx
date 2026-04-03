@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { Check, Download } from "lucide-react";
 import { ScoreRing } from "@/components/features/report/score-ring";
 import {
@@ -12,12 +14,32 @@ import {
 import type { AppView, ActiveReport, User } from "@/types";
 
 interface ReportViewProps {
-  report: ActiveReport;
-  user: User | null;
-  onNavigate: (view: AppView) => void;
+  report?: ActiveReport;
+  user?: User | null;
+  onNavigate?: (view: AppView) => void;
 }
 
-export function ReportView({ report, user, onNavigate }: ReportViewProps) {
+export function ReportView({ report: initialReport, user: initialUser, onNavigate: customNavigate }: ReportViewProps) {
+  const router = useRouter();
+  const params = useParams();
+  
+  const [currentUser] = useState<User>(initialUser || {
+    name: "Alex Kim",
+    email: "alex@example.com",
+    role: "user",
+    plan: "free",
+    auditsUsed: 2,
+  });
+
+  const report: ActiveReport = initialReport || { 
+    url: "example.com", 
+    date: "Jan 28 2025", 
+    score: 42, 
+    issues: 5 
+  };
+
+  const user = currentUser;
+  const onNavigate = customNavigate || ((view: AppView) => router.push(`/${view === "landing" ? "" : view}`));
   return (
     <div className="min-h-screen bg-[var(--bg-base)]" style={{ paddingTop: "64px" }}>
       {/* Top Bar */}

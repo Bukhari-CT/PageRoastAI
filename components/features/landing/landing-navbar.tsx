@@ -1,25 +1,18 @@
-"use client";
-
-import { useState } from "react";
+import Link from "next/link";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LANDING_NAV_LINKS } from "@/constants";
-import type { AppView } from "@/types";
 
-interface LandingNavbarProps {
-  onNavigate: (view: AppView) => void;
-}
-
-export function LandingNavbar({ onNavigate }: LandingNavbarProps) {
+export function LandingNavbar() {
   return (
     <nav
       className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-[var(--border-color)]"
       style={{ background: "rgba(10,10,10,0.8)" }}
     >
       <div className="max-w-[80rem] mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 font-bold text-lg text-[var(--text-primary)]">
+        <Link href="/" className="flex items-center gap-2 font-bold text-lg text-[var(--text-primary)] hover:opacity-80 transition-opacity">
           <span>🔥</span>
           <span>PageRoast</span>
-        </div>
+        </Link>
 
         <div className="flex gap-8 items-center">
           {LANDING_NAV_LINKS.map((item) => (
@@ -35,18 +28,18 @@ export function LandingNavbar({ onNavigate }: LandingNavbarProps) {
 
         <div className="flex items-center gap-3">
           <ThemeToggle />
-          <button
-            onClick={() => onNavigate("login")}
-            className="border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer"
+          <Link
+            href="/login"
+            className="border border-[var(--border-color)] text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer block"
           >
             Log In
-          </button>
-          <button
-            onClick={() => onNavigate("signup")}
-            className="bg-[var(--pr-accent)] hover:bg-[var(--pr-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-none"
+          </Link>
+          <Link
+            href="/signup"
+            className="bg-[var(--pr-accent)] hover:bg-[var(--pr-accent-hover)] text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-none block"
           >
             Sign Up
-          </button>
+          </Link>
         </div>
       </div>
     </nav>

@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { isValidUrl } from "@/lib/validators";
-import type { AppView } from "@/types";
 
 interface HeroSectionProps {
   onRoast: () => void;
