@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { isValidUrl } from "@/lib/validators";
 
 interface HeroSectionProps {
@@ -30,50 +31,39 @@ function handleValidateAndRoast(
 }
 
 export function HeroSection({ onRoast, auditUrl, onUrlChange, urlError, onUrlErrorChange }: HeroSectionProps) {
-  const [focused, setFocused] = useState(false);
-
   return (
     <section className="flex flex-col items-center justify-center min-h-screen px-6 py-20 gap-6">
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10">
         <span className="text-indigo-400 text-xs font-medium">✦ AI-Powered UX Audits</span>
       </div>
 
-      <h1 className="text-5xl font-bold leading-tight max-w-3xl text-center text-[var(--text-primary)]">
+      <h1 className="text-5xl font-bold leading-tight max-w-3xl text-center text-foreground">
         Your landing page is costing you customers.
       </h1>
 
-      <p className="text-lg text-[var(--text-muted)] max-w-xl text-center">
+      <p className="text-lg text-muted-foreground max-w-xl text-center">
         Paste your URL and get a brutally honest AI audit — with the exact code to fix every issue.
       </p>
 
       <div className="w-full max-w-lg">
         <div className="flex gap-3">
-          <input
+          <Input
             type="url"
             value={auditUrl}
             onChange={(e) => { onUrlChange(e.target.value); onUrlErrorChange(""); }}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
             placeholder="https://your-landing-page.com"
-            className="flex-1 bg-[var(--input-bg)] text-[var(--text-primary)] rounded-lg px-4 py-3 text-base outline-none transition-all"
-            style={{
-              border: `1px solid ${urlError ? "var(--danger)" : "var(--input-border)"}`,
-              boxShadow: focused ? "0 0 0 2px var(--accent-glow)" : "none",
-            }}
+            className={`flex-1 h-12 text-base ${urlError ? "border-destructive ring-destructive" : ""}`}
           />
-          <button
+          <Button
             onClick={() => handleValidateAndRoast(auditUrl, onUrlErrorChange, onRoast)}
-            className="px-6 py-3 font-semibold text-white text-base rounded-lg whitespace-nowrap transition-all cursor-pointer border-none"
-            style={{
-              background: "linear-gradient(to right, var(--pr-accent), #7c3aed)",
-              boxShadow: "0 0 24px var(--accent-glow)",
-            }}
+            size="lg"
+            className="h-12 px-8 font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 shadow-[0_0_24px_rgba(79,70,229,0.4)]"
           >
             Roast My Page →
-          </button>
+          </Button>
         </div>
         {urlError && (
-          <p className="text-[var(--danger)] text-xs mt-1 flex items-center gap-1">
+          <p className="text-destructive text-xs mt-1 flex items-center gap-1">
             <span>⚠</span> {urlError}
           </p>
         )}
