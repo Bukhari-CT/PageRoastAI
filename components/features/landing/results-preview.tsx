@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Check, CheckCircle, Lock, Copy } from "lucide-react";
 import { ScoreRing } from "@/components/features/report/score-ring";
-import { useClipboard } from "@/hooks/use-clipboard";
+import { useClipboard } from "@/hooks/useClipboard";
 import {
   ROAST_LINES, STRENGTHS, CODE_SNIPPET, AI_REWRITTEN_HERO_COPY,
   CRITICAL_ISSUES_LIST, SCORE_BREAKDOWN_METRICS, AUDIT_ISSUES,

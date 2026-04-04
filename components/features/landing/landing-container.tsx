@@ -7,7 +7,7 @@ import { LoadingAnalysis } from "./loading-analysis";
 import { LandingResultsPreview } from "./results-preview";
 import { PricingSection } from "./pricing-section";
 import { Footer } from "./footer";
-import { useLoadingSteps } from "@/hooks/use-loading-steps";
+import { useLoadingSteps } from "@/hooks/useLoadingSteps";
 import { LOADING_STEPS } from "@/constants";
 import type { LandingView, AppView } from "@/types";
 import { useRouter } from "next/navigation";

@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { User } from "@/types";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { loginAction } from "@/app/actions/auth-actions";
+import type { User } from "@/types";
 
 interface LoginFormProps {
   onLogin?: (user: User) => void;
@@ -15,21 +18,30 @@ interface LoginFormProps {
 export function LoginForm({ onLogin }: LoginFormProps) {
   const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
 
   function handleLoginSuccess(user: User) {
     if (onLogin) onLogin(user);
     router.push("/dashboard");
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    handleLoginSuccess({
-      name: "Alex Kim",
-      email: form.email || "alex@example.com",
-      role: "user",
-      plan: "free",
-      auditsUsed: 2,
-    });
+    setIsPending(true);
+    setError(null);
+
+    const { data, error: actionError } = await loginAction(form);
+    
+    setIsPending(false);
+    if (actionError) {
+      setError(actionError);
+      return;
+    }
+
+    if (data) {
+      handleLoginSuccess(data as User);
+    }
   }
 
   function setDemoUser(role: "user" | "admin" | "guest") {
@@ -59,6 +71,11 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -68,6 +85,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="bg-zinc-950/50"
+                disabled={isPending}
               />
             </div>
             <div className="space-y-2">
@@ -82,13 +100,15 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="bg-zinc-950/50"
+                disabled={isPending}
               />
             </div>
             <Button
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
+              disabled={isPending}
             >
-              Sign In →
+              {isPending ? "Signing in..." : "Sign In →"}
             </Button>
           </form>
 
@@ -119,7 +139,6 @@ export function LoginForm({ onLogin }: LoginFormProps) {
         </CardFooter>
       </Card>
 
-      {/* Demo shortcuts */}
       <div className="mt-8 flex gap-2 justify-center items-center text-xs">
         <span className="text-muted-foreground">Demo logins:</span>
         {(["user", "admin", "guest"] as const).map((role) => (

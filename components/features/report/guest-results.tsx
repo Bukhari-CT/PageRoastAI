@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Check, Lock } from "lucide-react";
 import { ScoreRing } from "@/components/features/report/score-ring";
-import { useClipboard } from "@/hooks/use-clipboard";
+import { useClipboard } from "@/hooks/useClipboard";
 import { ROAST_LINES, CODE_SNIPPET, AI_REWRITTEN_HERO_COPY, DEMO_AUDIT_SCORE } from "@/constants";
 import type { AppView } from "@/types";
 
