@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Check, CheckCircle, Lock, Copy } from "lucide-react";
+import { X, Check, CheckCircle, Lock, Copy, ArrowRight, Zap, Code, TrendingUp, FileText, BarChart3, AlertTriangle } from "lucide-react";
 import { ScoreRing } from "@/components/features/report/score-ring";
+import { Button } from "@/components/ui/button";
 import { useClipboard } from "@/hooks/useClipboard";
 import {
   ROAST_LINES, STRENGTHS, CODE_SNIPPET, AI_REWRITTEN_HERO_COPY,
@@ -20,27 +21,39 @@ export function LandingResultsPreview({ onNavigate }: LandingResultsPreviewProps
   const [showModal, setShowModal] = useState(false);
 
   return (
-    <section className="px-6 py-16 max-w-5xl mx-auto space-y-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <section className="px-6 py-20 max-w-5xl mx-auto space-y-16 animate-in fade-in slide-in-from-bottom-8 duration-700">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
         {/* Score + link */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-6 flex flex-col items-center gap-4">
+        <div className="lg:col-span-2 bg-card border border-border rounded-3xl p-10 flex flex-col items-center gap-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl -z-10 group-hover:bg-indigo-500/10 transition-colors" />
           <ScoreRing score={DEMO_AUDIT_SCORE} />
-          <button
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-foreground mb-1">Your UX Score</h3>
+            <p className="text-muted-foreground text-sm">Below average for your industry</p>
+          </div>
+          <Button
+            variant="link"
             onClick={() => setShowModal(true)}
-            className="text-indigo-400 hover:text-indigo-300 underline text-sm mt-2 transition-colors cursor-pointer bg-transparent border-none"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-semibold group/btn"
           >
-            View Full Report →
-          </button>
+            View Detailed Analysis 
+            <ArrowRight className="h-4 w-4 ml-2 group-hover/btn:translate-x-1 transition-transform" />
+          </Button>
         </div>
 
         {/* Critical Issues */}
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-6">
-          <h3 className="text-[var(--text-primary)] font-semibold mb-6">Critical Issues</h3>
-          <ul className="space-y-4">
+        <div className="lg:col-span-3 bg-card border border-border rounded-3xl p-10 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+            <h3 className="text-xl font-bold text-foreground">Critical Vulnerabilities</h3>
+          </div>
+          <ul className="space-y-6">
             {CRITICAL_ISSUES_LIST.map((truth, i) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="text-red-500 font-bold mt-0.5 flex-shrink-0">✕</span>
-                <p className="text-sm text-[var(--text-muted)] leading-relaxed">{truth}</p>
+              <li key={i} className="flex items-start gap-4 group">
+                <div className="mt-1 h-6 w-6 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0 group-hover:bg-red-500/20 transition-colors">
+                  <X className="h-3.5 w-3.5 text-red-500" />
+                </div>
+                <p className="text-base text-muted-foreground leading-relaxed group-hover:text-foreground transition-colors">{truth}</p>
               </li>
             ))}
           </ul>
@@ -49,89 +62,120 @@ export function LandingResultsPreview({ onNavigate }: LandingResultsPreviewProps
 
       {/* Rewritten Copy + Code */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-6">
-          <h3 className="text-[var(--text-primary)] font-semibold text-sm mb-4">AI-Rewritten Hero Copy</h3>
-          <textarea
-            readOnly
-            className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg p-4 text-sm text-[var(--text-muted)] font-mono resize-none outline-none leading-relaxed"
-            rows={5}
-            defaultValue={AI_REWRITTEN_HERO_COPY}
-          />
+        <div className="bg-card border border-border rounded-3xl p-8 flex flex-col shadow-sm">
+          <div className="flex items-center gap-2 mb-6">
+            <Zap className="h-5 w-5 text-amber-500" />
+            <h3 className="text-lg font-bold text-foreground">Optimized Hero Copy</h3>
+          </div>
+          <div className="flex-1 min-h-[160px] bg-muted/30 border border-border rounded-2xl p-6 relative group">
+            <textarea
+              readOnly
+              className="w-full h-full bg-transparent border-none text-base text-foreground font-medium resize-none outline-none leading-relaxed italic"
+              defaultValue={AI_REWRITTEN_HERO_COPY}
+            />
+            <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">AI Suggested</span>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color)]">
-            <h3 className="text-[var(--text-primary)] font-semibold text-sm">Suggested Fix</h3>
+        <div className="bg-card border border-border rounded-3xl flex flex-col shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-8 py-5 border-b border-border bg-muted/10">
+            <div className="flex items-center gap-2">
+              <Code className="h-5 w-5 text-indigo-500" />
+              <h3 className="text-lg font-bold text-foreground">Implementation Fix</h3>
+            </div>
             <button
               onClick={() => copy(CODE_SNIPPET)}
-              className="flex items-center gap-1.5 text-zinc-500 hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground border border-transparent hover:border-border"
             >
               {copied ? (
                 <>
-                  <Check size={16} className="text-indigo-500" />
-                  <span className="text-xs font-mono">Copied!</span>
+                  <Check size={14} className="text-indigo-500" />
+                  <span className="text-xs font-mono font-bold">Copied!</span>
                 </>
               ) : (
                 <>
-                  <Copy size={16} />
-                  <span className="text-xs font-mono">Copy</span>
+                  <Copy size={14} />
+                  <span className="text-xs font-mono font-bold">Copy</span>
                 </>
               )}
             </button>
           </div>
-          <pre className="p-6 overflow-x-auto text-xs font-mono text-[var(--text-muted)] leading-relaxed bg-[#0F0F0F]">
-            <code>{CODE_SNIPPET}</code>
+          <pre className="p-8 overflow-x-auto text-sm font-mono text-muted-foreground leading-relaxed bg-[#0F0F0F] dark:bg-black/40">
+            <code className="text-indigo-300/90">{CODE_SNIPPET}</code>
           </pre>
         </div>
       </div>
 
       {/* Paywall */}
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl overflow-hidden relative min-h-64">
-        <div className="p-8 blur-sm pointer-events-none select-none" aria-hidden="true">
-          <h3 className="text-[var(--text-primary)] font-semibold text-sm mb-4">Advanced SEO Insights</h3>
-          <ul className="space-y-2 text-xs text-[var(--text-muted)] font-mono">
-            <li className="flex items-center gap-2">
-              <div className="h-2 w-12 bg-zinc-700 rounded" /> Core Web Vitals score
-            </li>
-          </ul>
+      <div className="bg-card border border-border rounded-[2rem] overflow-hidden relative min-h-[300px] shadow-xl border-dashed border-2">
+        <div className="p-10 blur-[6px] pointer-events-none select-none opacity-40" aria-hidden="true">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="h-5 w-5 text-emerald-500" />
+            <h3 className="text-xl font-bold text-foreground">Conversion Optimization Matrix</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="h-24 rounded-xl bg-muted" />
+            ))}
+          </div>
         </div>
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm rounded-xl gap-3">
-          <Lock size={32} className="text-indigo-500" />
-          <button
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/40 backdrop-blur-md gap-6 text-center px-8">
+          <div className="h-16 w-16 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-2xl shadow-indigo-500/20">
+            <Lock size={32} className="text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="max-w-md space-y-2">
+            <h3 className="text-2xl font-bold text-foreground">Unlock 12+ Professional Insights</h3>
+            <p className="text-muted-foreground">Get the full report including page performance, trust signals, and revenue leak detectors.</p>
+          </div>
+          <Button
             onClick={() => onNavigate("signup")}
-            className="mt-4 px-6 py-2 font-semibold text-white text-sm rounded-lg bg-indigo-600 hover:bg-indigo-500 transition-colors cursor-pointer border-none"
+            size="lg"
+            className="px-8 h-12 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold shadow-lg shadow-indigo-500/25"
           >
-            Sign Up to Unlock →
-          </button>
+            Unlock Full Report →
+          </Button>
         </div>
       </div>
 
       {/* Full Audit Report Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto">
-            <div className="px-8 pt-8 pb-4 flex justify-between items-start border-b border-[var(--border-color)]">
-              <div>
-                <h3 className="text-[var(--text-primary)] font-bold text-xl">Full Audit Report</h3>
-                <p className="text-zinc-500 text-sm mt-1">pageexample.com · Audited just now</p>
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-[100] flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="bg-card border border-border rounded-[2.5rem] w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="px-10 py-8 flex justify-between items-center border-b border-border bg-muted/10">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                  <FileText className="h-5 w-5 text-indigo-500" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-foreground">Audit Intelligence Report</h3>
+                  <p className="text-muted-foreground text-xs font-mono uppercase tracking-widest mt-0.5">pageroast-ai-v2 · Generated 4m ago</p>
+                </div>
               </div>
-              <button onClick={() => setShowModal(false)} className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors cursor-pointer bg-transparent border-none">
-                <X size={24} />
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <X size={20} />
               </button>
             </div>
 
-            <div className="px-8 pb-8 space-y-8">
-              <div className="pt-4">
-                <h4 className="text-[var(--text-primary)] font-semibold mb-4">Score Breakdown</h4>
-                <div className="space-y-4">
+            <div className="flex-1 overflow-y-auto px-10 py-10 space-y-12">
+              <div>
+                <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-indigo-500" />
+                  Diagnostic Metrics
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
                   {SCORE_BREAKDOWN_METRICS.map((metric) => (
-                    <div key={metric.label}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[var(--text-muted)] text-sm">{metric.label}</span>
-                        <span className="text-[var(--text-primary)] font-semibold text-sm">{metric.score}/100</span>
+                    <div key={metric.label} className="group">
+                      <div className="flex justify-between items-center mb-2.5">
+                        <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{metric.label}</span>
+                        <span className="text-sm font-bold text-foreground">{metric.score}%</span>
                       </div>
-                      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-                        <div className={`h-full ${metric.color} rounded-full transition-all`} style={{ width: `${metric.score}%` }} />
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className={`h-full ${metric.color} rounded-full transition-all duration-1000`} style={{ width: `${metric.score}%` }} />
                       </div>
                     </div>
                   ))}
@@ -139,43 +183,52 @@ export function LandingResultsPreview({ onNavigate }: LandingResultsPreviewProps
               </div>
 
               <div>
-                <h4 className="text-[var(--text-primary)] font-semibold mb-4">What&apos;s Working</h4>
-                <div className="space-y-3">
+                <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-emerald-500" />
+                  Core Strengths
+                </h4>
+                <div className="grid grid-cols-1 gap-4">
                   {STRENGTHS.map((s, i) => (
-                    <div key={i} className="bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg p-4" style={{ borderLeft: "3px solid var(--success)" }}>
-                      <div className="flex gap-2 items-start mb-1">
-                        <Check size={14} className="text-green-500 mt-0.5 flex-shrink-0" />
-                        <p className="text-[var(--text-primary)] text-sm font-medium">{s.headline}</p>
+                    <div key={i} className="bg-muted/20 border border-border rounded-2xl p-5 hover:bg-muted/30 transition-colors">
+                      <div className="flex gap-3 items-start mb-1.5">
+                        <div className="mt-1 h-5 w-5 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                          <Check size={12} className="text-emerald-500" />
+                        </div>
+                        <p className="text-sm font-bold text-foreground">{s.headline}</p>
                       </div>
-                      <p className="text-[var(--text-muted)] text-xs ml-[22px]">{s.detail}</p>
+                      <p className="text-xs text-muted-foreground ml-8 leading-relaxed">{s.detail}</p>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h4 className="text-[var(--text-primary)] font-semibold mb-4">All Issues Found</h4>
-                <div className="space-y-3">
+                <h4 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-amber-500" />
+                  Identified Friction Points
+                </h4>
+                <div className="grid grid-cols-1 gap-4">
                   {AUDIT_ISSUES.map((issue) => (
-                    <div key={issue.title} className="bg-[var(--input-bg)] rounded-lg p-4">
-                      <div className={`text-xs font-bold px-2 py-1 rounded-full inline-block mb-2 ${issue.color}`}>
+                    <div key={issue.title} className="bg-muted/30 border border-border rounded-2xl p-5 relative overflow-hidden group">
+                      <div className={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold uppercase tracking-widest ${issue.color} rounded-bl-xl opacity-70`}>
                         {issue.severity}
                       </div>
-                      <h5 className="text-[var(--text-primary)] text-sm font-medium">{issue.title}</h5>
-                      <p className="text-[var(--text-muted)] text-xs mt-1">{issue.desc}</p>
+                      <h5 className="text-sm font-bold text-foreground mb-1 group-hover:text-indigo-500 transition-colors">{issue.title}</h5>
+                      <p className="text-xs text-muted-foreground leading-relaxed pr-20">{issue.desc}</p>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="border-t border-[var(--border-color)] px-8 py-4">
-              <button
+            <div className="p-8 bg-muted/10 border-t border-border">
+              <Button
                 onClick={() => onNavigate("signup")}
-                className="w-full py-2 font-semibold text-white text-sm rounded-lg bg-indigo-600 hover:bg-indigo-500 transition-colors cursor-pointer border-none"
+                size="lg"
+                className="w-full h-14 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold shadow-xl shadow-indigo-500/20"
               >
-                Upgrade to Fix My Page →
-              </button>
+                Get Private Dashboard & Fixes →
+              </Button>
             </div>
           </div>
         </div>

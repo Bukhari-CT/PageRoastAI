@@ -145,7 +145,7 @@ export function CheckoutPage({ user: initialUser, onNavigate: customNavigate, on
                   <button onClick={() => { onNavigate("view-report"); }} className="bg-[var(--pr-accent)] text-white rounded-lg px-6 py-3 font-semibold text-sm cursor-pointer border-none">
                     View My Report →
                   </button>
-                  <button onClick={() => { onNavigate("user-dashboard"); }} className="border border-[var(--border-color)] text-[var(--text-muted)] rounded-lg px-6 py-3 font-semibold text-sm cursor-pointer bg-transparent">
+                  <button onClick={() => { onNavigate("dashboard"); }} className="border border-[var(--border-color)] text-[var(--text-muted)] rounded-lg px-6 py-3 font-semibold text-sm cursor-pointer bg-transparent">
                     Go to Dashboard
                   </button>
                 </div>

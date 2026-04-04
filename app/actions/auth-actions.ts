@@ -10,12 +10,13 @@ export async function loginAction(formData: any) {
   }
 
   // Mock login logic
+  const isAdmin = result.data.email.startsWith("admin");
   const mockUser = {
-    name: "Alex Kim",
+    name: isAdmin ? "Admin User" : "Alex Kim",
     email: result.data.email,
-    role: "user",
-    plan: "free",
-    auditsUsed: 2,
+    role: isAdmin ? "admin" : "user",
+    plan: isAdmin ? "agency" : "free",
+    auditsUsed: isAdmin ? 0 : 2,
   };
 
   return { data: mockUser, error: null };

@@ -5,7 +5,7 @@ export type AppView =
   | "login"
   | "signup"
   | "results"
-  | "user-dashboard"
+  | "dashboard"
   | "view-report"
   | "checkout";
 

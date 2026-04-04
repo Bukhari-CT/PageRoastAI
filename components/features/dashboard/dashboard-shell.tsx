@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FileSearch, TrendingUp, CheckCircle, Zap, Users, DollarSign } from "lucide-react";
 
@@ -11,6 +11,7 @@ import { SubscriptionTab } from "@/components/features/dashboard/subscription-ta
 import { AdminPortal } from "@/components/features/dashboard/admin-portal";
 import { PaymentDialog } from "@/components/features/dashboard/payment-dialog";
 import { AuditTable } from "@/components/features/dashboard/audit-table";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -33,16 +34,40 @@ interface DashboardShellProps {
 
 export function DashboardShell({ user: initialUser, onLogout: customLogout, onUpdateUser: customUpdateUser }: DashboardShellProps) {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User>(initialUser || {
-    name: "Alex Kim",
-    email: "alex@example.com",
-    role: "user",
-    plan: "free",
-    auditsUsed: 2,
+  const [currentUser, setCurrentUser] = useState<User>(() => {
+    if (initialUser) return initialUser;
+    
+    // Check local storage for demo persistence
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("pageroast_user");
+      if (saved) {
+        try {
+          return JSON.parse(saved) as User;
+        } catch (e) {
+          console.error("Failed to parse saved user", e);
+        }
+      }
+    }
+
+    return {
+      name: "Alex Kim",
+      email: "alex@example.com",
+      role: "user",
+      plan: "free",
+      auditsUsed: 2,
+    };
   });
 
+  useEffect(() => {
+    // Sync state if initialUser changes
+    if (initialUser) setCurrentUser(initialUser);
+  }, [initialUser]);
+
   const user = currentUser;
-  const onLogout = customLogout || (() => router.push("/"));
+  const onLogout = customLogout || (() => {
+    localStorage.removeItem("pageroast_user");
+    router.push("/");
+  });
   const onUpdateUser = (newUser: User) => {
     setCurrentUser(newUser);
     if (customUpdateUser) customUpdateUser(newUser);
@@ -120,6 +145,9 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
                 {PLAN_LABELS[user.plan] || user.plan}
               </span>
             </div>
+            <div className="ml-auto flex items-center gap-4">
+              <ThemeToggle />
+            </div>
           </header>
           <main className="p-8">
             {!isAdmin && userTab === "dashboard" && (
@@ -137,19 +165,23 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
                 onAuditUrlChange={(val) => { setAuditUrl(val); setUrlError(""); }}
                 onRoast={handleRoastClick}
                 onReset={() => { setShowResults(false); setAuditUrl(""); }}
+                onViewReport={(url) => router.push(`/report/${url.replace(/[^a-zA-Z0-9]/g, "-")}`)}
                 onUpgrade={() => setUserTab("subscription")}
               />
             )}
             {!isAdmin && userTab === "history" && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h1 className="text-3xl font-bold text-foreground mb-8">Audit History</h1>
-                <AuditTable rows={MOCK_AUDIT_HISTORY} />
+                <AuditTable 
+                  rows={MOCK_AUDIT_HISTORY} 
+                  onViewReport={(row) => router.push(`/report/${row.url.replace(/[^a-zA-Z0-9]/g, "-")}`)}
+                />
               </div>
             )}
             {!isAdmin && userTab === "subscription" && (
               <SubscriptionTab user={user} onUpgrade={(plan) => { setSelectedPlan(plan); setShowPaymentModal(true); }} />
             )}
-            {isAdmin && <AdminPortal adminStats={adminStats} />}
+            {isAdmin && <AdminPortal activeTab={adminTab} adminStats={adminStats} />}
           </main>
         </SidebarInset>
       </div>

@@ -12,7 +12,7 @@ interface ReportHeaderProps {
 export function ReportHeader({ report, onNavigate }: ReportHeaderProps) {
   return (
     <div className="sticky top-0 bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center z-40">
-      <button onClick={() => onNavigate("user-dashboard")} className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm cursor-pointer bg-transparent border-none transition-colors">
+      <button onClick={() => onNavigate("dashboard")} className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm cursor-pointer bg-transparent border-none transition-colors">
         ← Back to Dashboard
       </button>
       <div className="text-center">

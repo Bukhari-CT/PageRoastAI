@@ -19,6 +19,7 @@ interface RoastTabProps {
   onAuditUrlChange: (val: string) => void;
   onRoast: () => void;
   onReset: () => void;
+  onViewReport: (url: string) => void;
   onUpgrade: () => void;
 }
 
@@ -33,6 +34,7 @@ export function RoastTab({
   onAuditUrlChange,
   onRoast,
   onReset,
+  onViewReport,
   onUpgrade
 }: RoastTabProps) {
   return (
@@ -103,7 +105,7 @@ export function RoastTab({
                 </div>
               </div>
               <div className="flex gap-3">
-                <Button className="flex-1 bg-indigo-600 hover:bg-indigo-500">View Full Report →</Button>
+                <Button onClick={() => onViewReport(auditUrl)} className="flex-1 bg-indigo-600 hover:bg-indigo-500">View Full Report →</Button>
                 <Button variant="outline" onClick={onReset} className="flex-1">Start New Audit</Button>
               </div>
             </div>

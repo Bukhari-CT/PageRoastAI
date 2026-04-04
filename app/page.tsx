@@ -3,7 +3,7 @@ import { LandingNavbarServer } from "@/components/features/landing/landing-navba
 
 export default function PageRoastAI() {
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]" style={{ fontFamily: "system-ui" }}>
+    <div className="min-h-screen">
       <LandingNavbarServer />
       <LandingContainer />
     </div>
