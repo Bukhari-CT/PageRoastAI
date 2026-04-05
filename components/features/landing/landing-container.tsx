@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { HeroSection } from "./hero-section";
 import { HowItWorksSection } from "./how-it-works-section";
 import { LoadingAnalysis } from "./loading-analysis";
@@ -21,9 +21,11 @@ export function LandingContainer() {
   const { activeStep, completedSteps, isFinished } = useLoadingSteps(landingView === "loading");
 
   // Transition to results when loading finishes
-  if (isFinished && landingView === "loading") {
-    setLandingView("results");
-  }
+  useEffect(() => {
+    if (isFinished && landingView === "loading") {
+      setLandingView("results");
+    }
+  }, [isFinished, landingView]);
 
   function handleLandingRoast() {
     // In a real app, check for auth

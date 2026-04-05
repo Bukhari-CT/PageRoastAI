@@ -22,15 +22,14 @@ export function SignupForm({ onSignup }: SignupFormProps) {
     router.push("/dashboard");
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    handleSignupSuccess({
-      name: form.name || "Alex Kim",
-      email: form.email || "alex@example.com",
-      role: "user",
-      plan: "free",
-      auditsUsed: 0,
-    });
+    const { signupAction } = await import("@/app/actions/auth-actions");
+    const { data } = await signupAction(form);
+    
+    if (data) {
+      handleSignupSuccess(data as User);
+    }
   }
 
   return (

@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { loginAction } from "@/app/actions/auth-actions";
 import type { User } from "@/types";
 
 export function AdminLoginForm() {
@@ -23,8 +22,8 @@ export function AdminLoginForm() {
     setIsPending(true);
     setError(null);
 
-    // In a real app, this would be a specialized admin login action
-    const { data, error: actionError } = await loginAction(form);
+    const { adminLoginAction } = await import("@/app/actions/auth-actions");
+    const { data, error: actionError } = await adminLoginAction(form);
     
     setIsPending(false);
     if (actionError) {
@@ -32,11 +31,9 @@ export function AdminLoginForm() {
       return;
     }
 
-    if (data && (data as User).role === "admin") {
+    if (data) {
       localStorage.setItem("pageroast_user", JSON.stringify(data));
       router.push("/dashboard");
-    } else {
-      setError("Unauthorized. Admin access only.");
     }
   }
 

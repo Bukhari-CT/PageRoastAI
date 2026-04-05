@@ -6,7 +6,6 @@ export type AppView =
   | "signup"
   | "results"
   | "dashboard"
-  | "view-report"
   | "checkout";
 
 export type UserTab = "dashboard" | "roast" | "history" | "subscription";

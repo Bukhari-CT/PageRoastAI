@@ -34,43 +34,35 @@ interface DashboardShellProps {
 
 export function DashboardShell({ user: initialUser, onLogout: customLogout, onUpdateUser: customUpdateUser }: DashboardShellProps) {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User>(() => {
-    if (initialUser) return initialUser;
-    
-    // Check local storage for demo persistence
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("pageroast_user");
-      if (saved) {
-        try {
-          return JSON.parse(saved) as User;
-        } catch (e) {
-          console.error("Failed to parse saved user", e);
-        }
-      }
-    }
-
-    return {
-      name: "Alex Kim",
-      email: "alex@example.com",
-      role: "user",
-      plan: "free",
-      auditsUsed: 2,
-    };
+  
+  // Use server-provided user as the source of truth, but still support local state for UI updates
+  const [currentUser, setCurrentUser] = useState<User>(initialUser || {
+    name: "Demo User",
+    email: "demo@example.com",
+    role: "user",
+    plan: "free",
+    auditsUsed: 0
   });
 
   useEffect(() => {
-    // Sync state if initialUser changes
-    if (initialUser) setCurrentUser(initialUser);
+    // Treat localStorage only as a UI cache; server-session is the master
+    if (initialUser) {
+      localStorage.setItem("pageroast_user", JSON.stringify(initialUser));
+      setCurrentUser(initialUser);
+    }
   }, [initialUser]);
 
   const user = currentUser;
-  const onLogout = customLogout || (() => {
+  const onLogout = customLogout || (async () => {
     localStorage.removeItem("pageroast_user");
+    const { logoutAction } = await import("@/app/actions/auth-actions");
+    await logoutAction();
     router.push("/");
   });
   const onUpdateUser = (newUser: User) => {
     setCurrentUser(newUser);
     if (customUpdateUser) customUpdateUser(newUser);
+    localStorage.setItem("pageroast_user", JSON.stringify(newUser));
   };
 
   const [userTab, setUserTab] = useState<UserTab>("dashboard");
@@ -144,6 +136,11 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
               <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${getPlanBadgeClass(user.plan)}`}>
                 {PLAN_LABELS[user.plan] || user.plan}
               </span>
+              {user.email.endsWith("example.com") && (
+                <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                  Demo Mode
+                </span>
+              )}
             </div>
             <div className="ml-auto flex items-center gap-4">
               <ThemeToggle />

@@ -8,11 +8,17 @@ import type { AppView, User } from "@/types";
 
 interface CheckoutPageProps {
   user?: User | null;
-  onNavigate?: (view: AppView) => void;
+  onNavigate?: (view: any) => void;
   onUpdateUser?: (user: User) => void;
+  reportId?: string;
 }
 
-export function CheckoutPage({ user: initialUser, onNavigate: customNavigate, onUpdateUser: customUpdateUser }: CheckoutPageProps) {
+export function CheckoutPage({ 
+  user: initialUser, 
+  onNavigate: customNavigate, 
+  onUpdateUser: customUpdateUser,
+  reportId = "demo-report"
+}: CheckoutPageProps) {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User>(initialUser || {
     name: "Alex Kim",
@@ -23,12 +29,12 @@ export function CheckoutPage({ user: initialUser, onNavigate: customNavigate, on
   });
 
   const user = currentUser;
-  const onNavigate = customNavigate || ((view: AppView) => router.push(`/${view === "landing" ? "" : view}`));
+  const onNavigate = customNavigate || ((view: string) => router.push(`/${view === "landing" ? "" : view}`));
   const onUpdateUser = (newUser: User) => {
     setCurrentUser(newUser);
     if (customUpdateUser) customUpdateUser(newUser);
   };
-  const [paymentForm, setPaymentForm] = useState({ name: "", card: "", expiry: "", cvc: "" });
+  const [paymentForm, setPaymentForm] = useState({ email: user?.email || "", name: user?.name || "", card: "", expiry: "", cvc: "" });
   const [billingOpen, setBillingOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -63,8 +69,8 @@ export function CheckoutPage({ user: initialUser, onNavigate: customNavigate, on
                   <input
                     type="email"
                     placeholder="you@company.com"
-                    value={paymentForm.name}
-                    onChange={(e) => setPaymentForm({ ...paymentForm, name: e.target.value })}
+                    value={paymentForm.email}
+                    onChange={(e) => setPaymentForm({ ...paymentForm, email: e.target.value })}
                     className="w-full bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg p-3 text-[var(--text-primary)] text-sm outline-none"
                   />
                 </div>
@@ -142,7 +148,7 @@ export function CheckoutPage({ user: initialUser, onNavigate: customNavigate, on
                 <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Payment Successful!</h2>
                 <p className="text-[var(--text-muted)] text-sm mb-8">Your full audit report is now unlocked.</p>
                 <div className="flex gap-3">
-                  <button onClick={() => { onNavigate("view-report"); }} className="bg-[var(--pr-accent)] text-white rounded-lg px-6 py-3 font-semibold text-sm cursor-pointer border-none">
+                  <button onClick={() => { router.push(`/report/${reportId}`); }} className="bg-[var(--pr-accent)] text-white rounded-lg px-6 py-3 font-semibold text-sm cursor-pointer border-none">
                     View My Report →
                   </button>
                   <button onClick={() => { onNavigate("dashboard"); }} className="border border-[var(--border-color)] text-[var(--text-muted)] rounded-lg px-6 py-3 font-semibold text-sm cursor-pointer bg-transparent">
