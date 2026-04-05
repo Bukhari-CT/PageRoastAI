@@ -1,0 +1,56 @@
+# Antigravity — Qodo PR Review Configuration
+# Place at root of repository
+
+[github_app]
+pr_commands = [
+  "/describe",
+  "/review",
+  "/improve"
+]
+
+[pr_reviewer]
+require_score_review         = true
+require_tests_review         = true
+require_estimate_effort_to_review = true
+require_security_review      = true
+
+extra_instructions = """
+You are reviewing a Next.js 15 App Router SaaS application (LLM platform) 
+built with TypeScript, Tailwind CSS, and Supabase. Enforce the following 
+project-specific rules on every PR:
+
+SECURITY — flag as action_required if any of these are found:
+- Any private env var (SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY, STRIPE_SECRET_KEY, 
+  DATABASE_URL) is prefixed with NEXT_PUBLIC_ or passed as a prop to a Client Component
+- The Supabase admin client (service_role) is instantiated in a client component or hook
+- A .env file containing real secrets appears to be committed
+- import 'server-only' is missing from files that access private env vars
+- RLS is bypassed without explicit justification in a comment
+
+ARCHITECTURE — flag as remediation_recommended if any of these are found:
+- FSD layer boundary is violated (e.g. a feature importing from another feature,
+  shared importing from features/entities, app/ containing business logic)
+- A Server Component is unnecessarily converted to a Client Component 
+  ("use client" added without browser API, event listener, or hook usage)
+- Business logic placed directly inside app/ route files instead of features/
+- Supabase createBrowserClient() used in a Server Component or route handler
+- Supabase createServerClient() used in a browser/client context
+
+CODE QUALITY — flag as informational:
+- Component exceeds 200 lines
+- External data (API responses, form inputs) is not validated with Zod
+- Server Action does not return { data, error } shape — throwing to client instead
+- console.log left in non-development code
+- Relative ../../ imports that cross FSD layer boundaries
+- TypeScript 'any' used instead of 'unknown' or a typed interface
+- revalidatePath used broadly instead of revalidateTag
+"""
+
+[pr_code_suggestions]
+commitable_code_suggestions  = true
+num_code_suggestions_per_chunk = 4
+
+[auto_best_practices]
+enable_auto_best_practices   = true
+utilize_auto_best_practices  = true
+max_patterns                 = 5

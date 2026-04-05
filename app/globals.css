@@ -3,7 +3,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ─── PageRoast Theme System ──────────────────────────────────────────────── */
+/* These are the app-specific tokens used across all components.              */
+/* The .dark class is toggled by next-themes via darkMode: 'class'.           */
+
 :root {
+  /* Shadcn base tokens */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -37,9 +42,28 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* PageRoast app tokens — Light */
+  --bg-base: #FAFAFA;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F4F4F5;
+  --border-color: #E4E4E7;
+  --border-hover: #D4D4D8;
+  --text-primary: #09090B;
+  --text-muted: #52525B;
+  --text-hint: #A1A1AA;
+  --input-bg: #FFFFFF;
+  --input-border: #D4D4D8;
+  --pr-accent: #4F46E5;
+  --pr-accent-hover: #4338CA;
+  --accent-glow: rgba(79, 70, 229, 0.4);
+  --success: #16A34A;
+  --warning: #CA8A04;
+  --danger: #DC2626;
 }
 
 .dark {
+  /* Shadcn dark tokens */
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.145 0 0);
@@ -72,6 +96,24 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  /* PageRoast app tokens — Dark */
+  --bg-base: #0A0A0A;
+  --bg-surface: #111111;
+  --bg-elevated: #1A1A1A;
+  --border-color: #222222;
+  --border-hover: #333333;
+  --text-primary: #F5F5F5;
+  --text-muted: #71717A;
+  --text-hint: #3F3F46;
+  --input-bg: #09090B;
+  --input-border: #27272A;
+  --pr-accent: #4F46E5;
+  --pr-accent-hover: #4338CA;
+  --accent-glow: rgba(79, 70, 229, 0.4);
+  --success: #22C55E;
+  --warning: #EAB308;
+  --danger: #EF4444;
 }
 
 @theme inline {
@@ -122,4 +164,13 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ─── Animation Keyframes ─────────────────────────────────────────────────── */
+
+@keyframes dot-pulse {
+  0%, 20% { content: ""; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
 }
