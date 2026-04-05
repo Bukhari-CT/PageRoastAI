@@ -1,7 +1,6 @@
 "use server";
 
-import { z } from "zod";
-import { loginSchema } from "@/lib/validators";
+import { loginSchema, signupSchema } from "@/lib/validators";
 
 import { setSession, clearSession } from "@/lib/session";
 
@@ -51,11 +50,16 @@ export async function adminLoginAction(formData: any) {
 }
 
 export async function signupAction(formData: any) {
-  // Reuse login schema for simplicity in mock
-  const result = loginSchema.safeParse(formData);
+  const result = signupSchema.safeParse(formData);
+  
+  if (!result.success) {
+    return { data: null, error: "Invalid registration details" };
+  }
+
+  const { name, email } = result.data;
   const mockUser = {
-    name: formData.name || "New User",
-    email: formData.email || "new@example.com",
+    name,
+    email,
     role: ("user" as const),
     plan: ("free" as const),
     auditsUsed: 0,

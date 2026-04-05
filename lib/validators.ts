@@ -42,6 +42,14 @@ export const paymentSchema = z.object({
   cvc: z.string().regex(/^\d{3,4}$/, "CVC must be 3-4 digits"),
 });
 
+export const userSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  role: z.enum(["user", "admin"]),
+  plan: z.enum(["free", "pro", "agency"]),
+  auditsUsed: z.number().optional(),
+});
+
 // ─── Legacy Wrappers (Optional, for backward compatibility) ──────────────────
 
 export type FormErrors = Record<string, string>;
