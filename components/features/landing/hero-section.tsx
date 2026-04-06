@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { isValidUrl } from "@/lib/validators";
+import { isValidUrl } from "@/lib/utils";
 
 interface HeroSectionProps {
   onRoast: () => void;

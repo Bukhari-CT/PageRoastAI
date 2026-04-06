@@ -9,27 +9,51 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { useSignup } from "@/hooks/useAuth";
+
 interface SignupFormProps {
   onSignup?: (user: User) => void;
 }
 
 export function SignupForm({ onSignup }: SignupFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
-
-  function handleSignupSuccess(user: User) {
-    if (onSignup) onSignup(user);
-    router.push("/dashboard");
-  }
+  const { signup, loading, error, success } = useSignup();
+  const [form, setForm] = useState({ 
+    firstName: "", 
+    lastName: "", 
+    email: "", 
+    password: "", 
+    confirmPassword: "" 
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const { signupAction } = await import("@/app/actions/auth-actions");
-    const { data } = await signupAction(form);
+    const result = await signup(form);
     
-    if (data) {
-      handleSignupSuccess(data as User);
+    if (result.success && onSignup) {
+      onSignup({ email: form.email, name: `${form.firstName} ${form.lastName}` } as User);
     }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+        <Card className="w-full max-w-md border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-2xl text-green-500">Check your email</CardTitle>
+            <CardDescription>We've sent a verification link to {form.email}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              Please click the link in your email to verify your account and continue.
+            </p>
+            <Button onClick={() => router.push("/login")} className="w-full">
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -49,15 +73,34 @@ export function SignupForm({ onSignup }: SignupFormProps) {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="Alex Kim"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="bg-zinc-950/50"
-              />
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                {error}
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="Alex"
+                  value={form.firstName}
+                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                  className="bg-zinc-950/50"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Kim"
+                  value={form.lastName}
+                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
+                  className="bg-zinc-950/50"
+                  required
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -68,6 +111,7 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="bg-zinc-950/50"
+                required
               />
             </div>
             <div className="space-y-2">
@@ -79,6 +123,19 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="bg-zinc-950/50"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Repeat password"
+                value={form.confirmPassword}
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                className="bg-zinc-950/50"
+                required
               />
             </div>
             <p className="text-muted-foreground text-xs">
@@ -89,8 +146,9 @@ export function SignupForm({ onSignup }: SignupFormProps) {
             <Button
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
+              disabled={loading}
             >
-              Create Free Account →
+              {loading ? "Creating account..." : "Create Free Account →"}
             </Button>
           </form>
 

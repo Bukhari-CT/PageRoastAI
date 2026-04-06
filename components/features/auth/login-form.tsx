@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ShieldCheck, Lock, ArrowRight, Home, Chrome, Github } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { loginAction } from "@/app/actions/auth-actions";
 import type { User } from "@/types";
+
+import { useLogin } from "@/hooks/useAuth";
 
 interface LoginFormProps {
   onLogin?: (user: User) => void;
@@ -18,32 +20,17 @@ interface LoginFormProps {
 
 export function LoginForm({ onLogin }: LoginFormProps) {
   const router = useRouter();
+  const { login, loading, error } = useLogin();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
-
-  function handleLoginSuccess(user: User) {
-    if (onLogin) onLogin(user);
-    // Simple demo persistence
-    localStorage.setItem("pageroast_user", JSON.stringify(user));
-    router.push("/dashboard");
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsPending(true);
-    setError(null);
-
-    const { data, error: actionError } = await loginAction(form);
+    const result = await login(form);
     
-    setIsPending(false);
-    if (actionError) {
-      setError(actionError);
-      return;
-    }
-
-    if (data) {
-      handleLoginSuccess(data as User);
+    if (result.success && onLogin) {
+      // Note: User data is available via useSession or the auth result if needed, 
+      // but for onLogin callback we can just pass partial data if it's only for UI side-effects.
+      onLogin({ email: form.email } as User);
     }
   }
 
@@ -51,9 +38,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
     if (role === "guest") {
       router.push("/");
     } else if (role === "admin") {
-      handleLoginSuccess({ name: "Admin", email: "admin@pageroast.com", role: "admin", plan: "agency" });
+      setForm({ email: "admin@pageroast.com", password: "password123" });
     } else {
-      handleLoginSuccess({ name: "Alex Kim", email: "alex@example.com", role: "user", plan: "free", auditsUsed: 2 });
+      setForm({ email: "alex@example.com", password: "password123" });
     }
   }
 
@@ -100,13 +87,13 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="bg-background/50"
                   required
-                  disabled={isPending}
+                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Password</Label>
-                  <a href="#" className="text-[10px] uppercase font-bold text-indigo-500 hover:text-indigo-400">Forgot?</a>
+                  <Link href="/auth/forgot-password" className="text-[10px] uppercase font-bold text-indigo-500 hover:text-indigo-400">Forgot?</Link>
                 </div>
                 <div className="relative group">
                   <Input
@@ -117,7 +104,7 @@ export function LoginForm({ onLogin }: LoginFormProps) {
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     className="bg-background/50 pr-10"
                     required
-                    disabled={isPending}
+                    disabled={loading}
                   />
                   <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground opacity-50" />
                 </div>
@@ -125,9 +112,9 @@ export function LoginForm({ onLogin }: LoginFormProps) {
               <Button
                 type="submit"
                 className="w-full bg-indigo-600 hover:bg-indigo-500 text-white h-11 group transition-all"
-                disabled={isPending}
+                disabled={loading}
               >
-                {isPending ? "Authenticating..." : (
+                {loading ? "Authenticating..." : (
                   <span className="flex items-center gap-2">
                     Sign In
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

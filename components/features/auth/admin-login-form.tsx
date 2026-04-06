@@ -11,30 +11,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 import type { User } from "@/types";
 
+import { useLogin } from "@/hooks/useAuth";
+
 export function AdminLoginForm() {
   const router = useRouter();
+  const { login, loading, error } = useLogin();
   const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, setIsPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsPending(true);
-    setError(null);
-
-    const { adminLoginAction } = await import("@/app/actions/auth-actions");
-    const { data, error: actionError } = await adminLoginAction(form);
-    
-    setIsPending(false);
-    if (actionError) {
-      setError(actionError);
-      return;
-    }
-
-    if (data) {
-      localStorage.setItem("pageroast_user", JSON.stringify(data));
-      router.push("/dashboard");
-    }
+    await login(form);
   }
 
   return (
@@ -85,7 +71,7 @@ export function AdminLoginForm() {
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="bg-background/50 border-border/50 focus:border-amber-500/50 transition-colors"
                   required
-                  disabled={isPending}
+                  disabled={loading}
                 />
               </div>
               <div className="space-y-2">
@@ -99,7 +85,7 @@ export function AdminLoginForm() {
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     className="bg-background/50 pr-10 border-border/50 focus:border-amber-500/50 transition-colors"
                     required
-                    disabled={isPending}
+                    disabled={loading}
                   />
                   <Lock className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground opacity-50" />
                 </div>
@@ -107,9 +93,10 @@ export function AdminLoginForm() {
               <Button
                 type="submit"
                 className="w-full bg-amber-600 hover:bg-amber-500 text-white h-11 group transition-all"
-                disabled={isPending}
+                disabled={loading}
               >
-                {isPending ? "Verifying..." : (
+                {loading ? "Verifying..." : (
+
                   <span className="flex items-center gap-2">
                     Access Terminal
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

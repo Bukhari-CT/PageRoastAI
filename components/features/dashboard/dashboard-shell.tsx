@@ -17,8 +17,9 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 
 import { useLoadingSteps } from "@/hooks/useLoadingSteps";
+import { useLogout } from "@/hooks/useAuth";
 import { getPlanBadgeClass } from "@/lib/formatting";
-import { isValidUrl } from "@/lib/validators";
+import { cn, isValidUrl } from "@/lib/utils";
 import {
   USER_NAV_ITEMS, ADMIN_NAV_ITEMS,
   PLAN_LABELS, MOCK_AUDIT_HISTORY,
@@ -53,11 +54,11 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
   }, [initialUser]);
 
   const user = currentUser;
+  const { logout } = useLogout();
+
   const onLogout = customLogout || (async () => {
     localStorage.removeItem("pageroast_user");
-    const { logoutAction } = await import("@/app/actions/auth-actions");
-    await logoutAction();
-    router.push("/");
+    await logout();
   });
   const onUpdateUser = (newUser: User) => {
     setCurrentUser(newUser);
