@@ -31,7 +31,14 @@ export function SignupForm({ onSignup }: SignupFormProps) {
     const result = await signup(form);
     
     if (result.success && onSignup) {
-      onSignup({ email: form.email, name: `${form.firstName} ${form.lastName}` } as User);
+      onSignup({ 
+        email: form.email, 
+        name: `${form.firstName} ${form.lastName}`, 
+        firstName: form.firstName,
+        lastName: form.lastName,
+        role: "user",
+        plan: "free"
+      } as User);
     }
   }
 

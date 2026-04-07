@@ -61,8 +61,9 @@ export const wrapEmailHtml = (content: string) => `
  * @param html Email content in HTML.
  */
 export async function sendEmail(to: string, subject: string, html: string) {
+    const isProd = process.env.NODE_ENV === "production";
     try {
-        console.log(`Attempting to send email to ${to} with subject: ${subject}`);
+        console.log(`Attempting to send email ${isProd ? "[redacted]" : `to ${to}`} with subject: ${subject}`);
         const info = await transporter.sendMail({
             from: env.SMTP_FROM,
             to,

@@ -46,7 +46,7 @@ export default async function middleware(request: NextRequest) {
 
     // 1. Unauthenticated trying to access protected or admin route
     if (!isAuthenticated && (isProtectedRoute || isAdminRoute)) {
-        const callbackUrl = encodeURIComponent(pathname);
+        const callbackUrl = encodeURIComponent(pathname + request.nextUrl.search);
         return NextResponse.redirect(new URL(`${AUTH_REDIRECT}?callbackUrl=${callbackUrl}`, request.url));
     }
 

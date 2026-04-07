@@ -16,21 +16,29 @@ import { useLogin } from "@/hooks/useAuth";
 
 interface LoginFormProps {
   onLogin?: (user: User) => void;
+  callbackUrl?: string;
 }
 
-export function LoginForm({ onLogin }: LoginFormProps) {
+export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
   const router = useRouter();
   const { login, loading, error } = useLogin();
   const [form, setForm] = useState({ email: "", password: "" });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const result = await login(form);
+    const result = await login(form, callbackUrl);
     
     if (result.success && onLogin) {
       // Note: User data is available via useSession or the auth result if needed, 
       // but for onLogin callback we can just pass partial data if it's only for UI side-effects.
-      onLogin({ email: form.email } as User);
+      onLogin({ 
+        email: form.email,
+        name: "User",
+        firstName: "User",
+        lastName: "",
+        role: "user",
+        plan: "free"
+      } as User);
     }
   }
 

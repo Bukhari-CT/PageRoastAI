@@ -23,6 +23,8 @@ export function ReportView({ reportId, report: initialReport, user: initialUser,
   
   const [user] = useState<User>(initialUser || {
     name: "Alex Kim",
+    firstName: "Alex",
+    lastName: "Kim",
     email: "alex@example.com",
     role: "user",
     plan: "free",

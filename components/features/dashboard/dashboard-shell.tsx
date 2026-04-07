@@ -39,6 +39,8 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
   // Use server-provided user as the source of truth, but still support local state for UI updates
   const [currentUser, setCurrentUser] = useState<User>(initialUser || {
     name: "Demo User",
+    firstName: "Demo",
+    lastName: "User",
     email: "demo@example.com",
     role: "user",
     plan: "free",

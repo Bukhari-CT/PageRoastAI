@@ -11,7 +11,7 @@ export function useLogin() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const login = async (values: LoginValues) => {
+    const login = async (values: LoginValues, callbackUrl: string = "/dashboard") => {
         setLoading(true);
         setError(null);
 
@@ -19,7 +19,7 @@ export function useLogin() {
             const { error: authError } = await authClient.signIn.email({
                 email: values.email,
                 password: values.password,
-                callbackURL: "/dashboard",
+                callbackURL: callbackUrl,
             });
 
             if (authError) {
@@ -28,7 +28,7 @@ export function useLogin() {
             }
 
             // Client-side redirect if callbackURL didn't already trigger it
-            router.push("/dashboard");
+            router.push(callbackUrl);
             return { success: true };
         } catch (err: unknown) {
             setError("An unexpected error occurred. Please try again.");
@@ -54,6 +54,14 @@ export function useSignup() {
         setLoading(true);
         setError(null);
         setSuccess(false);
+
+        // 1. Zod Validation (including confirmPassword match)
+        const validation = signupSchema.safeParse(values);
+        if (!validation.success) {
+            setError(validation.error.errors[0].message);
+            setLoading(false);
+            return { success: false };
+        }
 
         try {
             // @ts-ignore - custom fields firstName/lastName are verified server-side
