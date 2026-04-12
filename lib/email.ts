@@ -55,26 +55,36 @@ export const wrapEmailHtml = (content: string) => `
 `;
 
 /**
- * Sends an email using Nodemailer.
- * @param to Recipient's email address.
- * @param subject Email subject line.
- * @param html Email content in HTML.
+ * Masks an email address for safe logging. e.g. "alex@example.com" → "a***@e***.com"
  */
+function maskEmail(email: string): string {
+    const [local, domain] = email.split("@");
+    if (!local || !domain) return "***@***";
+    const domainParts = domain.split(".");
+    const maskedLocal = local[0] + "***";
+    const maskedDomain = domainParts.map((p) => p[0] + "***").join(".");
+    return `${maskedLocal}@${maskedDomain}`;
+}
+
 export async function sendEmail(to: string, subject: string, html: string) {
     const isProd = process.env.NODE_ENV === "production";
+    const safeRecipient = isProd ? "[redacted]" : maskEmail(to);
+
     try {
-        console.log(`Attempting to send email ${isProd ? "[redacted]" : `to ${to}`} with subject: ${subject}`);
+        console.log(`[Email] Sending subject="${subject}" to=${safeRecipient}`);
         const info = await transporter.sendMail({
             from: env.SMTP_FROM,
             to,
             subject,
             html: wrapEmailHtml(html),
         });
-        console.log(`Email sent successfully: ${info.messageId}`);
+        console.log(`[Email] Sent OK messageId=${info.messageId}`);
         return { data: info, error: null };
     } catch (err: unknown) {
-        console.error("Email sending failed:");
-        console.error(err);
-        return { data: null, error: err instanceof Error ? err.message : String(err) };
+        const rawMessage = err instanceof Error ? err.message : String(err);
+        // Strip the raw recipient address from any SMTP error messages
+        const safeMessage = rawMessage.replaceAll(to, safeRecipient);
+        console.error(`[Email] Send failed to=${safeRecipient}: ${safeMessage}`);
+        return { data: null, error: safeMessage };
     }
 }

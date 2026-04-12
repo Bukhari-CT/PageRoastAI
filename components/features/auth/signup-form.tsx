@@ -17,7 +17,7 @@ interface SignupFormProps {
 
 export function SignupForm({ onSignup }: SignupFormProps) {
   const router = useRouter();
-  const { signup, loading, error, success } = useSignup();
+  const { signup, loading, error, fieldErrors, success } = useSignup();
   const [form, setForm] = useState({ 
     firstName: "", 
     lastName: "", 
@@ -25,6 +25,10 @@ export function SignupForm({ onSignup }: SignupFormProps) {
     password: "", 
     confirmPassword: "" 
   });
+
+  function updateField(field: string, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,10 +96,13 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                   id="firstName"
                   placeholder="Alex"
                   value={form.firstName}
-                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  className="bg-zinc-950/50"
+                  onChange={(e) => updateField("firstName", e.target.value)}
+                  className={`bg-zinc-950/50 ${fieldErrors.firstName ? "border-destructive" : ""}`}
                   required
                 />
+                {fieldErrors.firstName && (
+                  <p className="text-destructive text-xs">{fieldErrors.firstName}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
@@ -103,10 +110,13 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                   id="lastName"
                   placeholder="Kim"
                   value={form.lastName}
-                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  className="bg-zinc-950/50"
+                  onChange={(e) => updateField("lastName", e.target.value)}
+                  className={`bg-zinc-950/50 ${fieldErrors.lastName ? "border-destructive" : ""}`}
                   required
                 />
+                {fieldErrors.lastName && (
+                  <p className="text-destructive text-xs">{fieldErrors.lastName}</p>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -116,10 +126,13 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 type="email"
                 placeholder="you@company.com"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="bg-zinc-950/50"
+                onChange={(e) => updateField("email", e.target.value)}
+                className={`bg-zinc-950/50 ${fieldErrors.email ? "border-destructive" : ""}`}
                 required
               />
+              {fieldErrors.email && (
+                <p className="text-destructive text-xs">{fieldErrors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -128,10 +141,13 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 type="password"
                 placeholder="Create a password"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="bg-zinc-950/50"
+                onChange={(e) => updateField("password", e.target.value)}
+                className={`bg-zinc-950/50 ${fieldErrors.password ? "border-destructive" : ""}`}
                 required
               />
+              {fieldErrors.password && (
+                <p className="text-destructive text-xs">{fieldErrors.password}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -140,10 +156,13 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 type="password"
                 placeholder="Repeat password"
                 value={form.confirmPassword}
-                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                className="bg-zinc-950/50"
+                onChange={(e) => updateField("confirmPassword", e.target.value)}
+                className={`bg-zinc-950/50 ${fieldErrors.confirmPassword ? "border-destructive" : ""}`}
                 required
               />
+              {fieldErrors.confirmPassword && (
+                <p className="text-destructive text-xs">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
             <p className="text-muted-foreground text-xs">
               By signing up you agree to our{" "}

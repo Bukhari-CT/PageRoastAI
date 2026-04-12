@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { loginSchema, signupSchema, type LoginValues, type SignupValues } from "@/schemas/auth";
+import { sanitizeCallbackUrl } from "@/lib/utils";
 
 /**
  * Hook for handling login logic
@@ -15,11 +16,14 @@ export function useLogin() {
         setLoading(true);
         setError(null);
 
+        // ALWAYS sanitize input before using as redirect target
+        const safeUrl = sanitizeCallbackUrl(callbackUrl);
+
         try {
             const { error: authError } = await authClient.signIn.email({
                 email: values.email,
                 password: values.password,
-                callbackURL: callbackUrl,
+                callbackURL: safeUrl,
             });
 
             if (authError) {
@@ -28,7 +32,7 @@ export function useLogin() {
             }
 
             // Client-side redirect if callbackURL didn't already trigger it
-            router.push(callbackUrl);
+            router.push(safeUrl);
             return { success: true };
         } catch (err: unknown) {
             setError("An unexpected error occurred. Please try again.");
@@ -48,16 +52,26 @@ export function useSignup() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [success, setSuccess] = useState(false);
 
     const signup = async (values: SignupValues) => {
         setLoading(true);
         setError(null);
+        setFieldErrors({});
         setSuccess(false);
 
         // 1. Zod Validation (including confirmPassword match)
         const validation = signupSchema.safeParse(values);
         if (!validation.success) {
+            const flat = validation.error.flatten().fieldErrors;
+            const mapped: Record<string, string> = {};
+            for (const [key, messages] of Object.entries(flat)) {
+                if (messages && messages.length > 0) {
+                    mapped[key] = messages[0];
+                }
+            }
+            setFieldErrors(mapped);
             setError(validation.error.errors[0].message);
             setLoading(false);
             return { success: false };
@@ -88,7 +102,7 @@ export function useSignup() {
         }
     };
 
-    return { signup, loading, error, success };
+    return { signup, loading, error, fieldErrors, success };
 }
 
 /**

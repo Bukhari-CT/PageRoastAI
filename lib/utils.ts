@@ -14,3 +14,16 @@ export function isValidUrl(val: string): boolean {
   }
 }
 
+/**
+ * Ensures that the callbackUrl is a safe, relative path within the application.
+ * Prevents open redirect vulnerabilities by blocking external/absolute URLs.
+ */
+export function sanitizeCallbackUrl(url?: string | null): string {
+    if (!url) return "/dashboard";
+    // Must be relative: starts with '/' and NOT with '//'
+    if (url.startsWith("/") && !url.startsWith("//")) {
+        return url;
+    }
+    return "/dashboard";
+}
+

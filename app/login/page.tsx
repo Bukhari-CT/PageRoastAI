@@ -3,10 +3,11 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { LoginForm } from "@/components/features/auth/login-form";
+import { sanitizeCallbackUrl } from "@/lib/utils";
 
 function LoginContent() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || undefined;
+  const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"));
   
   return <LoginForm callbackUrl={callbackUrl} />;
 }
