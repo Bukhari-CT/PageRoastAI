@@ -30,25 +30,33 @@ export const auth = betterAuth({
         maxPasswordLength: 128,
         autoSignIn: false,
         async sendResetPassword({ user, url }: { user: { email: string }; url: string }) {
-            await sendEmail(
+            const result = await sendEmail(
                 user.email,
                 "Reset your password",
                 `<p>You requested a password reset. Click the link below to set a new password:</p>
                  <p><a href="${url}">${url}</a></p>
                  <p>This link will expire in 1 hour.</p>`
             );
+            console.log("token --", url);
+            if (result.error) {
+                throw new Error(`Failed to send reset email: ${result.error}`);
+            }
         },
     },
     emailVerification: {
         sendOnSignUp: true,
         autoSignInAfterVerification: true,
         async sendVerificationEmail({ user, url }: { user: { email: string }; url: string }) {
-            await sendEmail(
+            const result = await sendEmail(
                 user.email,
                 "Verify your email",
                 `<p>Welcome to PageRoastAI! Please verify your email address by clicking the link below:</p>
                  <p><a href="${url}">${url}</a></p>`
             );
+            console.log("token --", url);
+            if (result.error) {
+                throw new Error(`Failed to send verification email: ${result.error}`);
+            }
         },
     },
     password: {

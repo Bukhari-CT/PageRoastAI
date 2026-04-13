@@ -4,7 +4,7 @@ import React from "react";
 
 interface AuthAlertProps {
     type: "error" | "success";
-    message: string | React.ReactNode;
+    message: string | React.ReactNode | null | undefined;
 }
 
 /**
