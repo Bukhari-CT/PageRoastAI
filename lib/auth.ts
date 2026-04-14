@@ -37,10 +37,18 @@ export const auth = betterAuth({
                  <p><a href="${url}">${url}</a></p>
                  <p>This link will expire in 1 hour.</p>`
             );
-            console.log("token --", url);
+            console.log("Password reset email sent to", user.email);
             if (result.error) {
                 throw new Error(`Failed to send reset email: ${result.error}`);
             }
+        },
+        password: {
+            hash: async (password: string) => {
+                return await bcrypt.hash(password, 10);
+            },
+            verify: async ({ password, hash }: { password: string; hash: string }) => {
+                return await bcrypt.compare(password, hash);
+            },
         },
     },
     emailVerification: {
@@ -53,20 +61,13 @@ export const auth = betterAuth({
                 `<p>Welcome to PageRoastAI! Please verify your email address by clicking the link below:</p>
                  <p><a href="${url}">${url}</a></p>`
             );
-            console.log("token --", url);
+            console.log("Verification email sent to", user.email);
             if (result.error) {
                 throw new Error(`Failed to send verification email: ${result.error}`);
             }
         },
     },
-    password: {
-        hash: async (password: string) => {
-            return await bcrypt.hash(password, 10);
-        },
-        verify: async ({ password, hash }: { password: string; hash: string }) => {
-            return await bcrypt.compare(password, hash);
-        },
-    },
+
     hooks: {
         // Use 'before' hook to intercept sign-in and check for account lockout
         before: async (context: any) => {
