@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+
 import { Save, Lock, Mail, User as UserIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { authClient } from "@/lib/auth-client";
+import { setPasswordAction } from "@/app/actions/settings.actions";
 import type { User } from "@/types";
 
 interface UserSettingsTabProps {
@@ -77,11 +80,20 @@ export function UserSettingsTab({ user, onUpdateUser }: UserSettingsTabProps) {
 
     setIsUpdatingPassword(true);
 
-    const { error } = await authClient.changePassword({
-      newPassword: passwordForm.newPassword,
-      currentPassword: passwordForm.currentPassword,
-      revokeOtherSessions: false,
-    });
+    let error: any = null;
+
+    if (passwordForm.currentPassword) {
+      const res = await authClient.changePassword({
+        newPassword: passwordForm.newPassword,
+        currentPassword: passwordForm.currentPassword,
+        revokeOtherSessions: false,
+      });
+      error = res.error;
+    } else {
+      // If no current password is provided, attempt to use the custom server action
+      const res = await setPasswordAction(passwordForm.newPassword);
+      error = res.error ? new Error(res.error) : null;
+    }
 
     setIsUpdatingPassword(false);
 
@@ -204,7 +216,7 @@ export function UserSettingsTab({ user, onUpdateUser }: UserSettingsTabProps) {
 
             <div className="space-y-2">
               <Label htmlFor="currentPassword" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Current Password
+                Current Password <span className="text-muted-foreground/50 lowercase">(optional for social login)</span>
               </Label>
               <Input
                 id="currentPassword"
@@ -213,8 +225,8 @@ export function UserSettingsTab({ user, onUpdateUser }: UserSettingsTabProps) {
                 value={passwordForm.currentPassword}
                 onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                 className="bg-background/50"
-                required
               />
+              <p className="text-[10px] text-muted-foreground">Leave blank if you registered with Google and haven't set a password.</p>
             </div>
 
             <div className="space-y-2">
@@ -251,7 +263,7 @@ export function UserSettingsTab({ user, onUpdateUser }: UserSettingsTabProps) {
               type="submit"
               variant="outline"
               className="border-indigo-500/20 hover:bg-indigo-500/10 text-indigo-400"
-              disabled={isUpdatingPassword || !passwordForm.currentPassword || !passwordForm.newPassword}
+              disabled={isUpdatingPassword || !passwordForm.newPassword}
             >
               {isUpdatingPassword ? "Updating..." : "Update Password"}
             </Button>
