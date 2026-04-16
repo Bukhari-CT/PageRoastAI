@@ -9,6 +9,7 @@ export const USER_NAV_ITEMS: NavItem[] = [
   { id: "roast", label: "Roast My Page", icon: Flame },
   { id: "history", label: "History", icon: Clock },
   { id: "subscription", label: "Subscription", icon: CreditCard },
+  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export const ADMIN_NAV_ITEMS: NavItem[] = [

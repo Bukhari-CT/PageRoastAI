@@ -9,27 +9,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
+import { useSignup } from "@/hooks/useAuth";
+import { authClient } from "@/lib/auth-client";
+
 interface SignupFormProps {
   onSignup?: (user: User) => void;
 }
 
 export function SignupForm({ onSignup }: SignupFormProps) {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const { signup, loading, error, fieldErrors, success } = useSignup();
+  const [form, setForm] = useState({ 
+    firstName: "", 
+    lastName: "", 
+    email: "", 
+    password: "", 
+    confirmPassword: "" 
+  });
 
-  function handleSignupSuccess(user: User) {
-    if (onSignup) onSignup(user);
-    router.push("/dashboard");
+  function updateField(field: string, value: string) {
+    setForm((prev) => ({ ...prev, [field]: value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const { signupAction } = await import("@/app/actions/auth-actions");
-    const { data } = await signupAction(form);
+    const result = await signup(form);
     
-    if (data) {
-      handleSignupSuccess(data as User);
+    if (result.success && onSignup) {
+      onSignup({ 
+        email: form.email, 
+        name: `${form.firstName} ${form.lastName}`, 
+        firstName: form.firstName,
+        lastName: form.lastName,
+        role: "user",
+        plan: "free"
+      } as User);
     }
+  }
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6">
+        <Card className="w-full max-w-md border-border bg-card">
+          <CardHeader>
+            <CardTitle className="text-2xl text-green-500">Check your email</CardTitle>
+            <CardDescription>We've sent a verification link to {form.email}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="text-sm text-muted-foreground">
+              Please click the link in your email to verify your account and continue.
+            </p>
+            <Button onClick={() => router.push("/login")} className="w-full">
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -49,15 +85,40 @@ export function SignupForm({ onSignup }: SignupFormProps) {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                placeholder="Alex Kim"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="bg-zinc-950/50"
-              />
+            {error && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                {error}
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="Alex"
+                  value={form.firstName}
+                  onChange={(e) => updateField("firstName", e.target.value)}
+                  className={`bg-zinc-950/50 ${fieldErrors.firstName ? "border-destructive" : ""}`}
+                  required
+                />
+                {fieldErrors.firstName && (
+                  <p className="text-destructive text-xs">{fieldErrors.firstName}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Kim"
+                  value={form.lastName}
+                  onChange={(e) => updateField("lastName", e.target.value)}
+                  className={`bg-zinc-950/50 ${fieldErrors.lastName ? "border-destructive" : ""}`}
+                  required
+                />
+                {fieldErrors.lastName && (
+                  <p className="text-destructive text-xs">{fieldErrors.lastName}</p>
+                )}
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -66,9 +127,13 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 type="email"
                 placeholder="you@company.com"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="bg-zinc-950/50"
+                onChange={(e) => updateField("email", e.target.value)}
+                className={`bg-zinc-950/50 ${fieldErrors.email ? "border-destructive" : ""}`}
+                required
               />
+              {fieldErrors.email && (
+                <p className="text-destructive text-xs">{fieldErrors.email}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -77,9 +142,28 @@ export function SignupForm({ onSignup }: SignupFormProps) {
                 type="password"
                 placeholder="Create a password"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="bg-zinc-950/50"
+                onChange={(e) => updateField("password", e.target.value)}
+                className={`bg-zinc-950/50 ${fieldErrors.password ? "border-destructive" : ""}`}
+                required
               />
+              {fieldErrors.password && (
+                <p className="text-destructive text-xs">{fieldErrors.password}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Repeat password"
+                value={form.confirmPassword}
+                onChange={(e) => updateField("confirmPassword", e.target.value)}
+                className={`bg-zinc-950/50 ${fieldErrors.confirmPassword ? "border-destructive" : ""}`}
+                required
+              />
+              {fieldErrors.confirmPassword && (
+                <p className="text-destructive text-xs">{fieldErrors.confirmPassword}</p>
+              )}
             </div>
             <p className="text-muted-foreground text-xs">
               By signing up you agree to our{" "}
@@ -89,8 +173,9 @@ export function SignupForm({ onSignup }: SignupFormProps) {
             <Button
               type="submit"
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
+              disabled={loading}
             >
-              Create Free Account →
+              {loading ? "Creating account..." : "Create Free Account →"}
             </Button>
           </form>
 
@@ -98,12 +183,15 @@ export function SignupForm({ onSignup }: SignupFormProps) {
             <span className="relative z-10 bg-card px-2 text-muted-foreground">or continue with</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full">
-              Google
-            </Button>
-            <Button variant="outline" className="w-full">
-              GitHub
+          <div className="grid grid-cols-1 gap-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full gap-2"
+              onClick={() => authClient.signIn.social({ provider: "google" })}
+              disabled={loading}
+            >
+              Continue with Google
             </Button>
           </div>
         </CardContent>

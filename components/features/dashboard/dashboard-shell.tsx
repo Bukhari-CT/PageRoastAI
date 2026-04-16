@@ -11,14 +11,16 @@ import { SubscriptionTab } from "@/components/features/dashboard/subscription-ta
 import { AdminPortal } from "@/components/features/dashboard/admin-portal";
 import { PaymentDialog } from "@/components/features/dashboard/payment-dialog";
 import { AuditTable } from "@/components/features/dashboard/audit-table";
+import { UserSettingsTab } from "@/components/features/settings/user-settings-tab";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 
 import { useLoadingSteps } from "@/hooks/useLoadingSteps";
+import { useLogout } from "@/hooks/useAuth";
 import { getPlanBadgeClass } from "@/lib/formatting";
-import { isValidUrl } from "@/lib/validators";
+import { cn, isValidUrl } from "@/lib/utils";
 import {
   USER_NAV_ITEMS, ADMIN_NAV_ITEMS,
   PLAN_LABELS, MOCK_AUDIT_HISTORY,
@@ -38,6 +40,8 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
   // Use server-provided user as the source of truth, but still support local state for UI updates
   const [currentUser, setCurrentUser] = useState<User>(initialUser || {
     name: "Demo User",
+    firstName: "Demo",
+    lastName: "User",
     email: "demo@example.com",
     role: "user",
     plan: "free",
@@ -53,11 +57,11 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
   }, [initialUser]);
 
   const user = currentUser;
+  const { logout } = useLogout();
+
   const onLogout = customLogout || (async () => {
     localStorage.removeItem("pageroast_user");
-    const { logoutAction } = await import("@/app/actions/auth-actions");
-    await logoutAction();
-    router.push("/");
+    await logout();
   });
   const onUpdateUser = (newUser: User) => {
     setCurrentUser(newUser);
@@ -177,6 +181,9 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
             )}
             {!isAdmin && userTab === "subscription" && (
               <SubscriptionTab user={user} onUpgrade={(plan) => { setSelectedPlan(plan); setShowPaymentModal(true); }} />
+            )}
+            {!isAdmin && userTab === "settings" && (
+              <UserSettingsTab user={user} onUpdateUser={onUpdateUser} />
             )}
             {isAdmin && <AdminPortal activeTab={adminTab} adminStats={adminStats} />}
           </main>
