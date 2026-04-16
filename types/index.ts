@@ -8,7 +8,7 @@ export type AppView =
   | "dashboard"
   | "checkout";
 
-export type UserTab = "dashboard" | "roast" | "history" | "subscription";
+export type UserTab = "dashboard" | "roast" | "history" | "subscription" | "settings";
 export type AdminTab = "dashboard" | "users" | "plans" | "settings";
 export type UserRole = "user" | "admin";
 export type PlanId = "free" | "pro" | "agency";

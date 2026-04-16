@@ -11,6 +11,7 @@ import { SubscriptionTab } from "@/components/features/dashboard/subscription-ta
 import { AdminPortal } from "@/components/features/dashboard/admin-portal";
 import { PaymentDialog } from "@/components/features/dashboard/payment-dialog";
 import { AuditTable } from "@/components/features/dashboard/audit-table";
+import { UserSettingsTab } from "@/components/features/settings/user-settings-tab";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -180,6 +181,9 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
             )}
             {!isAdmin && userTab === "subscription" && (
               <SubscriptionTab user={user} onUpgrade={(plan) => { setSelectedPlan(plan); setShowPaymentModal(true); }} />
+            )}
+            {!isAdmin && userTab === "settings" && (
+              <UserSettingsTab user={user} onUpdateUser={onUpdateUser} />
             )}
             {isAdmin && <AdminPortal activeTab={adminTab} adminStats={adminStats} />}
           </main>
