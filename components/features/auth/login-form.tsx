@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, Lock, ArrowRight, Home, Chrome, Github } from "lucide-react";
+import { ShieldCheck, Lock, ArrowRight, Home, Chrome } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import type { User } from "@/types";
 
 import { useLogin } from "@/hooks/useAuth";
+import { authClient } from "@/lib/auth-client";
 
 interface LoginFormProps {
   onLogin?: (user: User) => void;
@@ -135,14 +136,16 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
               <span className="relative z-10 bg-card px-3 text-muted-foreground">or continue with</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full gap-2 text-xs font-bold uppercase tracking-wider h-10 border-border hover:bg-secondary">
+            <div className="grid grid-cols-1 gap-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full gap-2 text-xs font-bold uppercase tracking-wider h-10 border-border hover:bg-secondary"
+                onClick={() => authClient.signIn.social({ provider: "google" })}
+                disabled={loading}
+              >
                 <Chrome className="h-3.5 w-3.5 text-red-500" />
-                Google
-              </Button>
-              <Button variant="outline" className="w-full gap-2 text-xs font-bold uppercase tracking-wider h-10 border-border hover:bg-secondary">
-                <Github className="h-3.5 w-3.5" />
-                GitHub
+                Continue with Google
               </Button>
             </div>
           </CardContent>

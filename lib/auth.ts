@@ -68,6 +68,18 @@ export const auth = betterAuth({
         },
     },
 
+    socialProviders: {
+        google: {
+            clientId: env.GOOGLE_CLIENT_ID as string,
+            clientSecret: env.GOOGLE_CLIENT_SECRET as string,
+            mapProfileToUser: (profile: any) => {
+                return {
+                    firstName: profile.given_name || profile.name?.split(" ")[0] || "User",
+                    lastName: profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+                }
+            }
+        },
+    },
     hooks: {
         // Use 'before' hook to intercept sign-in and check for account lockout
         before: async (context: any) => {

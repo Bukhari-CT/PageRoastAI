@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { useSignup } from "@/hooks/useAuth";
+import { authClient } from "@/lib/auth-client";
 
 interface SignupFormProps {
   onSignup?: (user: User) => void;
@@ -182,12 +183,15 @@ export function SignupForm({ onSignup }: SignupFormProps) {
             <span className="relative z-10 bg-card px-2 text-muted-foreground">or continue with</span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="w-full">
-              Google
-            </Button>
-            <Button variant="outline" className="w-full">
-              GitHub
+          <div className="grid grid-cols-1 gap-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full gap-2"
+              onClick={() => authClient.signIn.social({ provider: "google" })}
+              disabled={loading}
+            >
+              Continue with Google
             </Button>
           </div>
         </CardContent>

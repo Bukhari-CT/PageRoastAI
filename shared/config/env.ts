@@ -12,6 +12,8 @@ const envSchema = z.object({
   SMTP_FROM: z.string(),
   ADMIN_EMAIL: z.string().email(),
   ADMIN_PASSWORD: z.string().min(8),
+  GOOGLE_CLIENT_ID: z.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().default(""),
 });
 
 export const env = envSchema.parse({
@@ -26,4 +28,6 @@ export const env = envSchema.parse({
   SMTP_FROM: process.env.SMTP_FROM,
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
 });
