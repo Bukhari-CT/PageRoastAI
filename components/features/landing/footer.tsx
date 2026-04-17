@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border-color)] px-6 py-8 bg-[var(--bg-base)]">
@@ -7,9 +9,9 @@ export function Footer() {
           <p className="text-zinc-600 text-xs mt-2">© 2025 PageRoast. All rights reserved.</p>
         </div>
         <div className="flex items-center gap-6">
-          <a href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Privacy</a>
-          <a href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Terms</a>
-          <a href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Contact</a>
+          <Link href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Privacy</Link>
+          <Link href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Terms</Link>
+          <Link href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Contact</Link>
         </div>
       </div>
     </footer>

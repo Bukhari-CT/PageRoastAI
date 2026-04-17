@@ -8,7 +8,7 @@ import type { AppView, User } from "@/types";
 
 interface CheckoutPageProps {
   user?: User | null;
-  onNavigate?: (view: any) => void;
+  onNavigate?: (view: string) => void;
   onUpdateUser?: (user: User) => void;
   reportId?: string;
 }

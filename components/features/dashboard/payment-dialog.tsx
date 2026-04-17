@@ -6,13 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { PAYMENT_INCLUDES } from "@/constants";
 
+export interface PaymentFormState {
+  email?: string;
+  name: string;
+  card: string;
+  expiry: string;
+  cvc: string;
+}
+
 interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedPlan: "pro" | "agency";
   onSuccess: (plan: "pro" | "agency") => void;
-  form: any;
-  onFormChange: (form: any) => void;
+  form: PaymentFormState;
+  onFormChange: (form: PaymentFormState) => void;
 }
 
 export function PaymentDialog({ open, onOpenChange, selectedPlan, onSuccess, form, onFormChange }: PaymentDialogProps) {
