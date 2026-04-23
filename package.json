@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "seed": "npx tsx prisma/seed-admin.ts",
+    "seed:plans": "npx tsx prisma/seed-plans.ts"
   },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.21",

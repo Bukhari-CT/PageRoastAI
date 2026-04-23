@@ -74,3 +74,19 @@ model Verification {
 
   @@map("verifications")
 }
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String
+  price       String
+  features    String[]
+  buttonLabel String?
+  buttonStyle String?
+  recommended Boolean  @default(false)
+  enabled     Boolean  @default(true)
+  monthlyAudits Int    @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("plans")
+}

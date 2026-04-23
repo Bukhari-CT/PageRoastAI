@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Settings as SettingsIcon, Mail, Save, Trash2 } from "lucide-react";
+import { Settings as SettingsIcon, Mail, Save, Trash2, Loader2 } from "lucide-react";
+
+import { UserSettingsTab } from "@/components/features/settings/user-settings-tab";
+import { useSession } from "@/lib/auth-client";
+import type { User } from "@/types";
 
 export function AdminSettingsTab() {
+  const { data: sessionData, isPending } = useSession();
+
   const [siteSettings, setSiteSettings] = useState({
     name: "PageRoast AI",
     supportEmail: "support@pageroast.ai",
@@ -24,19 +30,36 @@ export function AdminSettingsTab() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <Card className="border-border bg-card/50">
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-indigo-600/10 border border-indigo-500/20">
-              <SettingsIcon className="h-5 w-5 text-indigo-400" />
-            </div>
-            <div>
-              <CardTitle>Global Site Settings</CardTitle>
-              <CardDescription>Configure basic platform behavior and branding.</CardDescription>
-            </div>
+    <div className="space-y-12 max-w-3xl pb-10">
+      <div className="space-y-6">
+        {isPending ? (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        </CardHeader>
+        ) : sessionData?.user ? (
+          <UserSettingsTab 
+            user={sessionData.user as unknown as User} 
+            onUpdateUser={() => {}} 
+          />
+        ) : null}
+      </div>
+
+      <div className="space-y-8">
+        <div>
+          <h2 className="text-3xl font-bold text-foreground mb-2">Platform Settings</h2>
+          <p className="text-muted-foreground">Manage global site behavior and configurations.</p>
+        </div>
+
+        <Card className="border-border bg-card/50 shadow-sm backdrop-blur-sm">
+          <CardHeader className="border-b border-border/50 bg-muted/20">
+            <div className="flex items-center gap-3">
+              <SettingsIcon className="h-5 w-5 text-indigo-400" />
+              <div>
+                <CardTitle className="text-lg">Global Site Settings</CardTitle>
+                <CardDescription>Configure basic platform behavior and branding.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
         <CardContent className="space-y-6 pt-4">
           <div className="space-y-2">
             <Label htmlFor="site-name">Application Name</Label>
@@ -114,6 +137,7 @@ export function AdminSettingsTab() {
           </Button>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
