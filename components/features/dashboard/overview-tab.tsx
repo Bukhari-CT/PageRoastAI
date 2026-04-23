@@ -6,9 +6,17 @@ import { AuditTable } from "@/components/features/dashboard/audit-table";
 import { MOCK_AUDIT_HISTORY } from "@/constants";
 import type { User } from "@/types";
 
+interface UserStat {
+  label: string;
+  value: string | number;
+  trend: string;
+  icon: React.ElementType;
+  color: string;
+}
+
 interface OverviewTabProps {
   user: User;
-  userStats: any[];
+  userStats: UserStat[];
   onViewHistory: () => void;
 }
 

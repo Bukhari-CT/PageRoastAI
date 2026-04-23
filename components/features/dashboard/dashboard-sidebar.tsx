@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import type { User, UserTab, AdminTab } from "@/types";
 
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+}
+
 interface DashboardSidebarProps {
   user: User;
-  navItems: any[];
+  navItems: NavItem[];
   activeTab: string;
   onTabChange: (id: string) => void;
   onLogout: () => void;
