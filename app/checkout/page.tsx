@@ -6,7 +6,8 @@ type Props = {
 
 export default async function CheckoutPage(props: Props) {
   const searchParams = await props.searchParams;
-  const reportId = (searchParams?.reportId as string) || "demo-report";
+  const reportIdParam = searchParams?.reportId;
+  const reportId = Array.isArray(reportIdParam) ? reportIdParam[0] : (reportIdParam || "demo-report");
 
   return <CheckoutComponent reportId={reportId} />;
 }

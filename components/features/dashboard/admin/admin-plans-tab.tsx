@@ -11,6 +11,12 @@ import type { PlanConfig } from "@/types";
 
 export function AdminPlansTab() {
   const [editingPlan, setEditingPlan] = useState<PlanConfig | null>(null);
+  const [editForm, setEditForm] = useState<PlanConfig | null>(null);
+
+  function handleEditPlan(p: PlanConfig) {
+    setEditingPlan(p);
+    setEditForm(p);
+  }
 
   return (
     <div className="relative">
@@ -24,24 +30,25 @@ export function AdminPlansTab() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Plan Name</Label>
-                <Input defaultValue={editingPlan.name} />
+                <Input value={editForm?.name || ""} onChange={(e) => setEditForm(editForm ? { ...editForm, name: e.target.value } : null)} />
               </div>
               <div className="space-y-2">
                 <Label>Price</Label>
-                <Input defaultValue={editingPlan.price} />
+                <Input value={editForm?.price || ""} onChange={(e) => setEditForm(editForm ? { ...editForm, price: e.target.value } : null)} />
               </div>
             </div>
             <div className="space-y-2">
               <Label>Features (one per line)</Label>
               <textarea 
                 className="w-full min-h-[100px] bg-background border border-border rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                defaultValue={editingPlan.features.join("\n")}
+                value={editForm?.features?.join("\n") || ""}
+                onChange={(e) => setEditForm(editForm ? { ...editForm, features: e.target.value.split("\n") } : null)}
               />
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-3 border-t border-border mt-4 pt-6">
-            <Button variant="ghost" onClick={() => setEditingPlan(null)}>Cancel</Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-500 px-8" onClick={() => setEditingPlan(null)}>
+            <Button variant="ghost" onClick={() => { setEditingPlan(null); setEditForm(null); }}>Cancel</Button>
+            <Button className="bg-indigo-600 hover:bg-indigo-500 px-8" onClick={() => { setEditingPlan(null); setEditForm(null); }}>
               Save Plan
             </Button>
           </CardFooter>
@@ -71,7 +78,7 @@ export function AdminPlansTab() {
                 </div>
               </CardContent>
               <CardFooter className="pt-6 border-t border-border/50">
-                <Button onClick={() => setEditingPlan(p)} className="w-full bg-indigo-600 hover:bg-indigo-500 h-10 gap-2">
+                <Button onClick={() => handleEditPlan(p)} className="w-full bg-indigo-600 hover:bg-indigo-500 h-10 gap-2">
                   <Edit2 className="h-4 w-4" />
                   Edit Plan Details
                 </Button>

@@ -12,7 +12,7 @@ export function AdminDashboardTab({ adminStats }: { adminStats: AdminStat[] }) {
           <Card key={i} className="border-border bg-card/50 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">{stat.label}</CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              {stat.icon ? <stat.icon className={`h-4 w-4 ${stat.color || ''}`} /> : null}
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
