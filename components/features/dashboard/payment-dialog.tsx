@@ -17,20 +17,22 @@ export interface PaymentFormState {
 interface PaymentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedPlan: "pro" | "agency";
-  onSuccess: (plan: "pro" | "agency") => void;
+  selectedPlan: any;
+  onSuccess: (plan: any) => void;
   form: PaymentFormState;
   onFormChange: (form: PaymentFormState) => void;
 }
 
 export function PaymentDialog({ open, onOpenChange, selectedPlan, onSuccess, form, onFormChange }: PaymentDialogProps) {
+  if (!selectedPlan) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-zinc-100">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Upgrade to {selectedPlan === "pro" ? "Pro" : "Agency"}</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Upgrade to {selectedPlan.name}</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            ${selectedPlan === "pro" ? "19" : "49"} · One-time payment
+            {selectedPlan.price} · One-time payment
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
@@ -85,7 +87,7 @@ export function PaymentDialog({ open, onOpenChange, selectedPlan, onSuccess, for
             className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 transition-all font-semibold"
             onClick={() => onSuccess(selectedPlan)}
           >
-            Pay ${selectedPlan === "pro" ? "19" : "49"} Now →
+            Pay {selectedPlan.price} Now →
           </Button>
         </DialogFooter>
       </DialogContent>

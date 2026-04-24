@@ -44,14 +44,21 @@ export async function getAdminUsersAction() {
 
 export async function toggleUserBlockAction(userId: string, block: boolean) {
   try {
-    await checkAdmin();
+    const currentUser = await checkAdmin();
+    
+    if (userId === currentUser.id) {
+      return { data: null, error: "Cannot change block status of your own admin account" };
+    }
     
     // Set lockedUntil to a date far in the future to block, or null to unblock
-    const lockedUntil = block ? new Date("2099-12-31T23:59:59Z") : null;
+    // Also reset failedPasswordAttempts on unblock to ensure smooth sign-in
+    const updateData = block 
+      ? { lockedUntil: new Date("2099-12-31T23:59:59Z") }
+      : { lockedUntil: null, failedPasswordAttempts: 0 };
     
     await prisma.user.update({
       where: { id: userId },
-      data: { lockedUntil },
+      data: updateData,
     });
 
     return { data: { success: true }, error: null };

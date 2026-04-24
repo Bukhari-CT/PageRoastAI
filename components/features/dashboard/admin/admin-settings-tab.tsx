@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,13 @@ export function AdminSettingsTab() {
   });
 
   const [savingSettings, setSavingSettings] = useState(false);
+  const [localUser, setLocalUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (sessionData?.user) {
+      setLocalUser(sessionData.user as unknown as User);
+    }
+  }, [sessionData?.user]);
 
   function handleSaveSettings() {
     setSavingSettings(true);
@@ -36,10 +43,10 @@ export function AdminSettingsTab() {
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
-        ) : sessionData?.user ? (
+        ) : localUser ? (
           <UserSettingsTab 
-            user={sessionData.user as unknown as User} 
-            onUpdateUser={() => {}} 
+            user={localUser} 
+            onUpdateUser={setLocalUser} 
           />
         ) : null}
       </div>

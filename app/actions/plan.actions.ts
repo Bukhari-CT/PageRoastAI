@@ -29,11 +29,26 @@ export async function getPlansAction() {
   }
 }
 
+export async function getActivePlansAction() {
+  try {
+    const plans = await prisma.plan.findMany({
+      where: { enabled: true },
+      orderBy: { price: "asc" },
+    });
+    return { data: plans, error: null };
+  } catch (error: any) {
+    console.error("Error fetching active plans:", error);
+    return { data: null, error: "Failed to fetch active plans" };
+  }
+}
+
 export async function createPlanAction(data: { name: string; price: string; features: string[]; enabled?: boolean; monthlyAudits?: number }) {
   try {
     await checkAdmin();
     
-    if (data.enabled) {
+    const willBeEnabled = data.enabled ?? true;
+    
+    if (willBeEnabled) {
       const activeCount = await prisma.plan.count({ where: { enabled: true } });
       if (activeCount >= 3) {
         return { data: null, error: "Cannot enable plan. Maximum of 3 plans can be active at one time." };
@@ -45,7 +60,7 @@ export async function createPlanAction(data: { name: string; price: string; feat
         name: data.name,
         price: data.price,
         features: data.features,
-        enabled: data.enabled ?? true,
+        enabled: willBeEnabled,
         monthlyAudits: data.monthlyAudits ?? 0,
       },
     });

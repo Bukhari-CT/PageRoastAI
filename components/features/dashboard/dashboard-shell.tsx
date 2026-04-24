@@ -76,7 +76,7 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<"pro" | "agency">("pro");
+  const [selectedPlan, setSelectedPlan] = useState<any>(null);
   const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   const [paymentForm, setPaymentForm] = useState({ name: "", card: "", expiry: "", cvc: "" });
 
@@ -113,8 +113,8 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
     { icon: Zap, label: "Audits Used", value: "2/3", trend: "1 remaining this month", color: "text-indigo-400" },
   ];
 
-  function handlePaymentSuccess(plan: "pro" | "agency") {
-    onUpdateUser({ ...user, plan });
+  function handlePaymentSuccess(plan: any) {
+    onUpdateUser({ ...user, plan: plan.id });
     setShowPaymentModal(false);
     setShowPaymentSuccess(true);
     setTimeout(() => setShowPaymentSuccess(false), 3000);

@@ -97,7 +97,7 @@ export const auth = betterAuth({
                             select: { failedPasswordAttempts: true, lockedUntil: true },
                         });
 
-                        if (user && user.failedPasswordAttempts >= 5 && user.lockedUntil && user.lockedUntil > new Date()) {
+                        if (user && user.lockedUntil && user.lockedUntil > new Date()) {
                             return {
                                 response: new Response(
                                     JSON.stringify({ message: "Account locked. Try again later." }),
