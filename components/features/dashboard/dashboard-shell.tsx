@@ -22,8 +22,9 @@ import { useLogout } from "@/hooks/useAuth";
 import { getPlanBadgeClass } from "@/lib/formatting";
 import { cn, isValidUrl } from "@/lib/utils";
 import {
-  USER_NAV_ITEMS, ADMIN_NAV_ITEMS,
-  PLAN_LABELS, MOCK_AUDIT_HISTORY,
+  USER_NAV_ITEMS,
+  ADMIN_NAV_ITEMS,
+  MOCK_AUDIT_HISTORY,
 } from "@/constants";
 import type { AppView, User, UserTab, AdminTab } from "@/types";
 
@@ -36,7 +37,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({ user: initialUser, onLogout: customLogout, onUpdateUser: customUpdateUser }: DashboardShellProps) {
   const router = useRouter();
-  
+
   // Use server-provided user as the source of truth, but still support local state for UI updates
   const [currentUser, setCurrentUser] = useState<User>(initialUser || {
     name: "Demo User",
@@ -44,7 +45,9 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
     lastName: "User",
     email: "demo@example.com",
     role: "user",
-    plan: "free",
+    planId: "free",
+    planName: "Free Plan",
+    monthlyAudits: 3,
     auditsUsed: 0
   });
 
@@ -114,7 +117,7 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
   ];
 
   function handlePaymentSuccess(plan: any) {
-    onUpdateUser({ ...user, plan: plan.id });
+    onUpdateUser({ ...user, planId: plan.id, planName: plan.name, monthlyAudits: plan.monthlyAudits || 30 });
     setShowPaymentModal(false);
     setShowPaymentSuccess(true);
     setTimeout(() => setShowPaymentSuccess(false), 3000);
@@ -137,8 +140,8 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
             <div className="flex items-center gap-2">
               <SidebarTrigger />
               <Separator orientation="vertical" className="mx-4 h-4" />
-              <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${getPlanBadgeClass(user.plan)}`}>
-                {PLAN_LABELS[user.plan] || user.plan}
+              <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold ${getPlanBadgeClass(user.planName)}`}>
+                {user.planName}
               </span>
               {user.email.endsWith("example.com") && (
                 <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30">
@@ -173,8 +176,8 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
             {!isAdmin && userTab === "history" && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h1 className="text-3xl font-bold text-foreground mb-8">Audit History</h1>
-                <AuditTable 
-                  rows={MOCK_AUDIT_HISTORY} 
+                <AuditTable
+                  rows={MOCK_AUDIT_HISTORY}
                   onViewReport={(row) => router.push(`/report/${row.url.replace(/[^a-zA-Z0-9]/g, "-")}`)}
                 />
               </div>

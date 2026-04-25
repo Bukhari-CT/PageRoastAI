@@ -11,7 +11,6 @@ export type AppView =
 export type UserTab = "dashboard" | "roast" | "history" | "subscription" | "settings";
 export type AdminTab = "dashboard" | "users" | "plans" | "settings";
 export type UserRole = "user" | "admin";
-export type PlanId = "free" | "pro" | "agency";
 export type LandingView = "hero" | "loading" | "results";
 
 // ─── Domain Models ───────────────────────────────────────────────────────────
@@ -22,7 +21,9 @@ export interface User {
   lastName: string;
   email: string;
   role: UserRole;
-  plan: PlanId;
+  planId: string;
+  planName: string;
+  monthlyAudits: number;
   auditsUsed?: number;
 }
 
@@ -61,7 +62,7 @@ export interface StatCard {
 }
 
 export interface PlanConfig {
-  id: PlanId;
+  id: string;
   name: string;
   price: string;
   features: string[];
