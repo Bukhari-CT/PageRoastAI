@@ -78,13 +78,5 @@ export const ADMIN_PLAN_CONFIGS: PlanConfig[] = [
   },
 ];
 
-// ─── Plan Display Helpers ────────────────────────────────────────────────────
-
-export const PLAN_LABELS: Record<string, string> = {
-  free: "Free Plan",
-  pro: "Pro",
-  agency: "Agency",
-};
-
 export const FREE_AUDIT_LIMIT = 3;
 export const FREE_AUDITS_USED = 2;

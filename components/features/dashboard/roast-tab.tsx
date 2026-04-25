@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScoreRing } from "@/components/features/report/score-ring";
 import { LoadingStepList } from "@/components/ui/loading-step-list";
-import { FREE_AUDIT_LIMIT, FREE_AUDITS_USED, DEMO_QUICK_SCORE } from "@/constants";
+import { DEMO_QUICK_SCORE } from "@/constants";
 import type { User } from "@/types";
 
 interface RoastTabProps {
@@ -46,16 +46,16 @@ export function RoastTab({
 
       <Card className="border-border bg-card shadow-xl overflow-hidden">
         <CardContent className="p-10">
-          {user.plan === "free" && (
+          {user.monthlyAudits < 30 && (
             <div className="mb-8">
               <div className="flex justify-between text-sm mb-2">
-                <p className="text-muted-foreground">{FREE_AUDITS_USED} of {FREE_AUDIT_LIMIT} free audits used</p>
+                <p className="text-muted-foreground">{user.auditsUsed || 0} of {user.monthlyAudits} audits used</p>
                 <Button variant="link" onClick={onUpgrade} className="text-indigo-400 p-0 h-auto text-xs">
                   Upgrade for unlimited
                 </Button>
               </div>
               <div className="bg-zinc-800 rounded-full h-2 mb-2">
-                <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${(FREE_AUDITS_USED / FREE_AUDIT_LIMIT) * 100}%` }} />
+                <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${((user.auditsUsed || 0) / user.monthlyAudits) * 100}%` }} />
               </div>
             </div>
           )}

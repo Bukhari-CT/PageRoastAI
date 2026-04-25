@@ -48,15 +48,15 @@ export function getGradeColor(score: number): string {
 
 // ─── Plan Badge Helpers ──────────────────────────────────────────────────────
 
-export function getPlanBadgeClass(plan: string): string {
-  switch (plan.toLowerCase()) {
-    case "agency":
-      return "bg-violet-600/20 text-violet-400";
-    case "pro":
-      return "bg-indigo-600/20 text-indigo-400";
-    default:
-      return "bg-zinc-800 text-zinc-400";
+export function getPlanBadgeClass(planName: string): string {
+  const name = planName?.toLowerCase() || "";
+  if (name.includes("agency")) {
+    return "bg-violet-600/20 text-violet-400";
   }
+  if (name.includes("pro") || name.includes("actionable")) {
+    return "bg-indigo-600/20 text-indigo-400";
+  }
+  return "bg-zinc-800 text-zinc-400";
 }
 
 export function getStatusBadgeClass(status: string): string {

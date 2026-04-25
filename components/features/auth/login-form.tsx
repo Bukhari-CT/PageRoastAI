@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, Lock, ArrowRight, Home, Chrome } from "lucide-react";
+import { Lock, ArrowRight, Chrome } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +28,11 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const result = await login(form, callbackUrl);
-    
+
     if (result.success && onLogin) {
       // Note: User data is available via useSession or the auth result if needed, 
       // but for onLogin callback we can just pass partial data if it's only for UI side-effects.
-      onLogin({ 
+      onLogin({
         email: form.email,
         name: "User",
         firstName: "User",
@@ -137,9 +137,9 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 className="w-full gap-2 text-xs font-bold uppercase tracking-wider h-10 border-border hover:bg-secondary"
                 onClick={() => authClient.signIn.social({ provider: "google" })}
                 disabled={loading}
@@ -163,24 +163,6 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
           </CardFooter>
         </Card>
 
-        {/* Demo Section */}
-        <div className="pt-4 border-t border-border/50">
-          <div className="flex flex-wrap gap-2 justify-center items-center">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mr-2">Demo:</span>
-            {(["user", "admin", "guest"] as const).map((role) => (
-              <Button
-                key={role}
-                variant="outline"
-                size="sm"
-                onClick={() => setDemoUser(role)}
-                className="capitalize h-7 px-3 text-[10px] font-bold tracking-wider border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all"
-              >
-                {role === "admin" && <ShieldCheck className="h-3 w-3 mr-1 text-amber-500" />}
-                {role}
-              </Button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

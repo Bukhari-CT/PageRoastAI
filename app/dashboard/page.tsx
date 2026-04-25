@@ -1,8 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import prisma from "@/lib/prisma";
 import { DashboardShell } from "@/components/features/dashboard/dashboard-shell";
-import type { User, UserRole, PlanId } from "@/types";
+import type { User, UserRole } from "@/types";
 
 /**
  * Dashboard Page - requires server-side session validation.
@@ -19,6 +20,18 @@ export default async function DashboardPage() {
 
     const { user: authUser } = session;
 
+    let planName = "The Reality Check";
+    let monthlyAudits = 18;
+    let planId = (authUser.package as string) || "";
+
+    if (planId) {
+        const dbPlan = await prisma.plan.findUnique({ where: { id: planId } });
+        if (dbPlan) {
+            planName = dbPlan.name;
+            monthlyAudits = dbPlan.monthlyAudits;
+        }
+    }
+
     // Transform Better Auth user to match Dashboard UI expectations
     const dashboardUser: User = {
         name: authUser.name || `${authUser.firstName} ${authUser.lastName}`,
@@ -26,7 +39,9 @@ export default async function DashboardPage() {
         lastName: authUser.lastName || "",
         email: authUser.email,
         role: (authUser.isAdmin ? "admin" : "user") as UserRole,
-        plan: (authUser.package as PlanId) || "free",
+        planId,
+        planName,
+        monthlyAudits,
         auditsUsed: 0, // In production, this would be fetched from DB
     };
 
