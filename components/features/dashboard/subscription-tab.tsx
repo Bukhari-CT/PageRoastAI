@@ -24,9 +24,11 @@ export function SubscriptionTab({ user, onUpgrade }: SubscriptionTabProps) {
         setPlans(data);
       }
       setLoading(false);
-    }
     loadPlans();
   }, []);
+
+  const targetPlan = plans.find((p) => p.recommended) || plans.find((p) => p.price !== "$0") || plans[0];
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h1 className="text-3xl font-bold text-foreground mb-1">Subscription</h1>
@@ -49,7 +51,12 @@ export function SubscriptionTab({ user, onUpgrade }: SubscriptionTabProps) {
             )}
           </div>
           {user.monthlyAudits < 30 && (
-            <Button onClick={() => onUpgrade(plans[1] || null)} size="lg" className="bg-indigo-600 hover:bg-indigo-700">
+            <Button 
+              onClick={() => onUpgrade(targetPlan)} 
+              disabled={loading || !targetPlan}
+              size="lg" 
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
               Upgrade Plan
             </Button>
           )}

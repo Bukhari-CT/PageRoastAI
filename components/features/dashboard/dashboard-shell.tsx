@@ -183,7 +183,12 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
               </div>
             )}
             {!isAdmin && userTab === "subscription" && (
-              <SubscriptionTab user={user} onUpgrade={(plan) => { setSelectedPlan(plan); setShowPaymentModal(true); }} />
+              <SubscriptionTab user={user} onUpgrade={(plan) => { 
+                if (plan) {
+                  setSelectedPlan(plan); 
+                  setShowPaymentModal(true); 
+                }
+              }} />
             )}
             {!isAdmin && userTab === "settings" && (
               <UserSettingsTab user={user} onUpdateUser={onUpdateUser} />

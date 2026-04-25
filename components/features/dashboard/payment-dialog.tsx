@@ -24,15 +24,13 @@ interface PaymentDialogProps {
 }
 
 export function PaymentDialog({ open, onOpenChange, selectedPlan, onSuccess, form, onFormChange }: PaymentDialogProps) {
-  if (!selectedPlan) return null;
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open && !!selectedPlan} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-zinc-950 border-zinc-800 text-zinc-100">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">Upgrade to {selectedPlan.name}</DialogTitle>
+          <DialogTitle className="text-xl font-bold">Upgrade to {selectedPlan?.name}</DialogTitle>
           <DialogDescription className="text-zinc-400">
-            {selectedPlan.price} · One-time payment
+            {selectedPlan?.price} · One-time payment
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-4">
@@ -85,9 +83,9 @@ export function PaymentDialog({ open, onOpenChange, selectedPlan, onSuccess, for
         <DialogFooter>
           <Button
             className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 transition-all font-semibold"
-            onClick={() => onSuccess(selectedPlan)}
+            onClick={() => selectedPlan && onSuccess(selectedPlan)}
           >
-            Pay {selectedPlan.price} Now →
+            Pay {selectedPlan?.price} Now →
           </Button>
         </DialogFooter>
       </DialogContent>
