@@ -9,8 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import type { User } from "@/types";
-
 import { useLogin } from "@/hooks/useAuth";
 
 export function AdminLoginForm() {
@@ -56,8 +54,8 @@ export function AdminLoginForm() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {error && (
-                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-2">
-                  <div className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+                  <div className="h-1.5 w-1.5 rounded-full bg-destructive" />
                   {error}
                 </div>
               )}
@@ -66,7 +64,7 @@ export function AdminLoginForm() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="admin@pageroast.com"
+                  placeholder="admin@pageroast.ai"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="bg-background/50 border-border/50 focus:border-amber-500/50 transition-colors"

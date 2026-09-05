@@ -16,7 +16,7 @@ export function ScoreRing({ score, size = 120, strokeWidth = 8, label = "Convers
       <svg width={size} height={size} viewBox="0 0 120 120">
         <circle
           cx="60" cy="60" r={SCORE_RING_RADIUS}
-          fill="none" stroke="var(--border-color)" strokeWidth={strokeWidth}
+          fill="none" className="stroke-border" strokeWidth={strokeWidth}
         />
         <circle
           cx="60" cy="60" r={SCORE_RING_RADIUS}
@@ -28,14 +28,15 @@ export function ScoreRing({ score, size = 120, strokeWidth = 8, label = "Convers
         />
         <text
           x="60" y="60" textAnchor="middle" dominantBaseline="middle"
-          style={{ fontSize: "32px", fontWeight: "bold", fill: "var(--text-primary)", fontFamily: "monospace" }}
+          className="fill-foreground"
+          style={{ fontSize: "32px", fontWeight: "bold", fontFamily: "monospace" }}
         >
           {score}
         </text>
       </svg>
       <div className="text-center">
-        <p className="text-xs text-zinc-500">/100</p>
-        <p className="text-sm text-zinc-500 mt-1">{label}</p>
+        <p className="text-xs text-muted-foreground">/100</p>
+        <p className="text-sm text-muted-foreground mt-1">{label}</p>
       </div>
     </div>
   );

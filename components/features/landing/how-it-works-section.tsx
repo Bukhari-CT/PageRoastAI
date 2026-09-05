@@ -15,7 +15,7 @@ export function HowItWorksSection() {
             <span className="text-indigo-600 dark:text-indigo-400 text-xs font-bold uppercase tracking-widest">The Process</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight italic">From URL to fixes in 60 seconds.</h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Stop guessing what's wrong. Let AI handle the heavy lifting while you copy-paste the wins.</p>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">Stop guessing what&apos;s wrong. Let AI handle the heavy lifting while you copy-paste the wins.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
           <div className="absolute top-1/2 left-0 right-0 h-px border-t border-dashed border-border/50 hidden md:block -translate-y-1/2 z-0" />

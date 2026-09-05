@@ -1,18 +1,55 @@
 import Link from "next/link";
 
+const PRODUCT_LINKS = [
+  { label: "Home", href: "/" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "Log In", href: "/login" },
+  { label: "Sign Up", href: "/signup" },
+];
+
+const LEGAL_LINKS = [{ label: "Privacy Policy", href: "/privacy" }];
+
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--border-color)] px-6 py-8 bg-[var(--bg-base)]">
-      <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+    <footer className="border-t border-border px-6 py-12 bg-background">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
+        <div className="sm:col-span-2 md:col-span-2">
+          <p className="text-foreground font-bold text-lg">🔥 PageRoast AI</p>
+          <p className="text-muted-foreground text-sm mt-2 max-w-xs">
+            Brutally honest AI audits for your landing page — with the exact code to fix every issue.
+          </p>
+        </div>
+
         <div>
-          <p className="text-[var(--text-primary)] font-bold text-lg">🔥 PageRoast AI</p>
-          <p className="text-zinc-600 text-xs mt-2">© 2025 PageRoast. All rights reserved.</p>
+          <p className="text-foreground text-xs font-bold uppercase tracking-widest mb-4">Product</p>
+          <ul className="space-y-3">
+            {PRODUCT_LINKS.map((link) => (
+              <li key={link.label}>
+                <Link href={link.href} className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="flex items-center gap-6">
-          <Link href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Privacy</Link>
-          <Link href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Terms</Link>
-          <Link href="#" className="text-zinc-500 hover:text-[var(--text-primary)] text-sm transition-colors">Contact</Link>
+
+        <div>
+          <p className="text-foreground text-xs font-bold uppercase tracking-widest mb-4">Legal</p>
+          <ul className="space-y-3">
+            {LEGAL_LINKS.map((link) => (
+              <li key={link.label}>
+                <Link href={link.href} className="text-muted-foreground hover:text-foreground text-sm transition-colors">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto mt-10 pt-6 border-t border-border/50">
+        <p className="text-muted-foreground text-xs">© {new Date().getFullYear()} PageRoast. All rights reserved.</p>
       </div>
     </footer>
   );

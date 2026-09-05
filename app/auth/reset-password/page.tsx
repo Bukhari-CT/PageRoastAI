@@ -3,7 +3,6 @@
 "use client";
 
 import React, { useState, Suspense } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +13,7 @@ import { resetPasswordSchema, type ResetPasswordValues } from "@/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 function ResetPasswordContent() {
     const router = useRouter();
@@ -68,7 +67,7 @@ function ResetPasswordContent() {
             } else {
                 setSuccess(true);
             }
-        } catch (err: unknown) {
+        } catch {
             setErrorMessage("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);

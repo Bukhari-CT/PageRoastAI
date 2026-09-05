@@ -13,11 +13,11 @@ export function LandingNavbar() {
           <span>PageRoast</span>
         </Link>
 
-        <div className="flex gap-8 items-center">
+        <div className="hidden md:flex gap-8 items-center">
           {LANDING_NAV_LINKS.map((item) => (
             <a
               key={item}
-              href={`#${item.toLowerCase().replace(" ", "-")}`}
+              href={`#${item.toLowerCase().replace(/\s+/g, "-")}`}
               className="text-muted-foreground hover:text-foreground text-sm transition-colors"
             >
               {item}
@@ -25,17 +25,17 @@ export function LandingNavbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
           <Link
             href="/login"
-            className="border border-border text-muted-foreground hover:text-foreground rounded-lg px-4 py-2 text-sm transition-colors cursor-pointer block"
+            className="border border-border text-muted-foreground hover:text-foreground rounded-lg px-3 sm:px-4 py-2 text-sm transition-colors cursor-pointer block"
           >
             Log In
           </Link>
           <Link
             href="/signup"
-            className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-none block"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg px-3 sm:px-4 py-2 text-sm font-medium transition-colors cursor-pointer border-none block"
           >
             Sign Up
           </Link>

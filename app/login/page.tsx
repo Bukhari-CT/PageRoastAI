@@ -1,21 +1,19 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
 import { LoginForm } from "@/components/features/auth/login-form";
 import { sanitizeCallbackUrl } from "@/lib/utils";
+import { isGoogleAuthConfigured } from "@/shared/config/env";
 
-function LoginContent() {
-  const searchParams = useSearchParams();
-  const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"));
-  
-  return <LoginForm callbackUrl={callbackUrl} />;
-}
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginContent />
-    </Suspense>
-  );
+/**
+ * Server component so OAuth availability is resolved from the environment
+ * without exposing configuration to the client bundle.
+ */
+export default async function LoginPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const raw = params?.callbackUrl;
+  const callbackUrl = sanitizeCallbackUrl(Array.isArray(raw) ? raw[0] : raw);
+
+  return <LoginForm callbackUrl={callbackUrl} googleEnabled={isGoogleAuthConfigured} />;
 }

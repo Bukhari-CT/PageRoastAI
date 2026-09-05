@@ -12,6 +12,8 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
@@ -26,7 +28,16 @@
     "paths": {
       "@/*": [
         "./*"
-      ]
+      ],
+      "@src/*": ["src/*"],
+      "@application/*": ["src/Application/*"],
+      "@domain/*": ["src/Domain/*"],
+      "@infrastructure/*": ["src/Infrastructure/*"],
+      "@database/*": ["src/Infrastructure/Database/*"],
+      "@models/*": ["src/Infrastructure/Database/Models/*"],
+      "@repositories/*": ["src/Infrastructure/Database/Repositories/*"],
+      "@diContainer/*": ["src/Infrastructure/DIContainer/*"],
+      "@services/*": ["src/Infrastructure/Services/*"]
     }
   },
   "include": [

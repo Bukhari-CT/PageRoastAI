@@ -32,7 +32,7 @@ function handleValidateAndRoast(
 
 export function HeroSection({ onRoast, auditUrl, onUrlChange, urlError, onUrlErrorChange }: HeroSectionProps) {
   return (
-    <section className="flex flex-col items-center justify-center min-h-screen px-6 py-20 gap-6">
+    <section className="flex flex-col items-center justify-center min-h-screen px-6 pt-32 pb-20 gap-6">
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10">
         <span className="text-indigo-400 text-xs font-medium">✦ AI-Powered UX Audits</span>
       </div>
@@ -46,7 +46,7 @@ export function HeroSection({ onRoast, auditUrl, onUrlChange, urlError, onUrlErr
       </p>
 
       <div className="w-full max-w-lg">
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Input
             type="url"
             value={auditUrl}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ShieldCheck, Lock, ArrowRight, Home, Chrome } from "lucide-react";
+import { Lock, ArrowRight, Chrome } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +18,11 @@ import { authClient } from "@/lib/auth-client";
 interface LoginFormProps {
   onLogin?: (user: User) => void;
   callbackUrl?: string;
+  /** Google sign-in is hidden unless the server has OAuth credentials. */
+  googleEnabled?: boolean;
 }
 
-export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
+export function LoginForm({ onLogin, callbackUrl, googleEnabled = false }: LoginFormProps) {
   const router = useRouter();
   const { login, loading, error } = useLogin();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -40,16 +42,6 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
         role: "user",
         plan: "free"
       } as User);
-    }
-  }
-
-  function setDemoUser(role: "user" | "admin" | "guest") {
-    if (role === "guest") {
-      router.push("/");
-    } else if (role === "admin") {
-      setForm({ email: "admin@pageroast.com", password: "password123" });
-    } else {
-      setForm({ email: "alex@example.com", password: "password123" });
     }
   }
 
@@ -132,22 +124,26 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
               </Button>
             </form>
 
-            <div className="relative my-8 text-center text-[10px] font-bold uppercase tracking-widest after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-              <span className="relative z-10 bg-card px-3 text-muted-foreground">or continue with</span>
-            </div>
+            {googleEnabled && (
+              <>
+                <div className="relative my-8 text-center text-[10px] font-bold uppercase tracking-widest after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+                  <span className="relative z-10 bg-card px-3 text-muted-foreground">or continue with</span>
+                </div>
 
-            <div className="grid grid-cols-1 gap-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full gap-2 text-xs font-bold uppercase tracking-wider h-10 border-border hover:bg-secondary"
-                onClick={() => authClient.signIn.social({ provider: "google" })}
-                disabled={loading}
-              >
-                <Chrome className="h-3.5 w-3.5 text-red-500" />
-                Continue with Google
-              </Button>
-            </div>
+                <div className="grid grid-cols-1 gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full gap-2 text-xs font-bold uppercase tracking-wider h-10 border-border hover:bg-secondary"
+                    onClick={() => authClient.signIn.social({ provider: "google" })}
+                    disabled={loading}
+                  >
+                    <Chrome className="h-3.5 w-3.5 text-red-500" />
+                    Continue with Google
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 text-center text-sm pt-2">
             <p className="text-muted-foreground">
@@ -162,25 +158,6 @@ export function LoginForm({ onLogin, callbackUrl }: LoginFormProps) {
             </p>
           </CardFooter>
         </Card>
-
-        {/* Demo Section */}
-        <div className="pt-4 border-t border-border/50">
-          <div className="flex flex-wrap gap-2 justify-center items-center">
-            <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mr-2">Demo:</span>
-            {(["user", "admin", "guest"] as const).map((role) => (
-              <Button
-                key={role}
-                variant="outline"
-                size="sm"
-                onClick={() => setDemoUser(role)}
-                className="capitalize h-7 px-3 text-[10px] font-bold tracking-wider border-border hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all"
-              >
-                {role === "admin" && <ShieldCheck className="h-3 w-3 mr-1 text-amber-500" />}
-                {role}
-              </Button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

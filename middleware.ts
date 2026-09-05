@@ -4,7 +4,6 @@ import { betterFetch } from "@better-fetch/fetch";
 import { type AuthSession } from "@/types/auth";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/", "/login", "/signup", "/auth/forgot-password", "/auth/reset-password", "/auth/verify-email"];
 const PROTECTED_ROUTES = ["/dashboard", "/scan", "/results", "/settings", "/billing"];
 const ADMIN_ROUTES = ["/admin"];
 const AUTH_REDIRECT = "/login";
@@ -40,9 +39,8 @@ export default async function middleware(request: NextRequest) {
     const isAuthenticated = !!session;
 
     // Access control logic
-    const isPublicRoute = PUBLIC_ROUTES.some((route) => pathname === route);
     const isProtectedRoute = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
-    const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route));
+    const isAdminRoute = ADMIN_ROUTES.some((route) => pathname.startsWith(route)) && pathname !== "/admin/login";
 
     // 1. Unauthenticated trying to access protected or admin route
     if (!isAuthenticated && (isProtectedRoute || isAdminRoute)) {

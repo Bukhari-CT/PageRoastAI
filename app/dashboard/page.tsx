@@ -2,7 +2,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { DashboardShell } from "@/components/features/dashboard/dashboard-shell";
-import type { User, UserRole, PlanId } from "@/types";
+import { resolvePlan } from "@/shared/config/plans";
+import type { User, UserRole } from "@/types";
 
 /**
  * Dashboard Page - requires server-side session validation.
@@ -26,8 +27,7 @@ export default async function DashboardPage() {
         lastName: authUser.lastName || "",
         email: authUser.email,
         role: (authUser.isAdmin ? "admin" : "user") as UserRole,
-        plan: (authUser.package as PlanId) || "free",
-        auditsUsed: 0, // In production, this would be fetched from DB
+        plan: resolvePlan(authUser.package).id,
     };
 
     return <DashboardShell user={dashboardUser} />;

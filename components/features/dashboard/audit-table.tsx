@@ -16,6 +16,17 @@ interface AuditTableProps {
 }
 
 export function AuditTable({ rows, onViewReport }: AuditTableProps) {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-transparent p-12 text-center">
+        <p className="text-foreground font-semibold">No audits yet</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          Your audit history will appear here.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       <Table>

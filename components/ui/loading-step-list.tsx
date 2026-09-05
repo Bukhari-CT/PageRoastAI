@@ -20,11 +20,8 @@ export function LoadingStepList({ activeStep, completedSteps }: LoadingStepListP
               {isDone ? "✓" : isActive ? "◆" : "◇"}
             </span>
             <span
-              className="text-sm"
-              style={{
-                color: isDone ? "#71717A" : isActive ? "var(--text-primary)" : "#71717A",
-                textDecoration: isDone ? "line-through" : "none",
-              }}
+              className={isActive ? "text-sm text-foreground" : "text-sm text-muted-foreground"}
+              style={{ textDecoration: isDone ? "line-through" : "none" }}
             >
               {step}
               {isActive && <span className="animate-pulse ml-1">...</span>}

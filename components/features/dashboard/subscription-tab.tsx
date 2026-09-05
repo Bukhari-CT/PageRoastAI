@@ -2,69 +2,69 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Receipt, Download, CheckCircle as CheckCircleIcon } from "lucide-react";
-import { PLAN_LABELS, SUBSCRIPTION_PLANS, MOCK_BILLING_HISTORY } from "@/constants";
+import { Receipt, CheckCircle as CheckCircleIcon } from "lucide-react";
+import { PLAN_LIST, formatPlanAllowance, resolvePlan } from "@/shared/config/plans";
 import type { User } from "@/types";
 
 interface SubscriptionTabProps {
   user: User;
-  onUpgrade: (plan: "pro" | "agency") => void;
 }
 
-export function SubscriptionTab({ user, onUpgrade }: SubscriptionTabProps) {
+export function SubscriptionTab({ user }: SubscriptionTabProps) {
+  const currentPlan = resolvePlan(user.plan);
+
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h1 className="text-3xl font-bold text-foreground mb-1">Subscription</h1>
       <p className="text-muted-foreground text-sm mb-8">Manage your plan and billing.</p>
 
       <Card className="mb-8 border-border bg-card">
-        <CardContent className="p-6 flex justify-between items-center">
+        <CardContent className="p-6 flex flex-wrap gap-4 justify-between items-center">
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Current Plan</p>
-            <p className="text-foreground font-bold text-2xl">{PLAN_LABELS[user.plan] || user.plan}</p>
+            <p className="text-foreground font-bold text-2xl">{currentPlan.name}</p>
             <p className="text-muted-foreground text-sm mt-1">
-              {user.plan === "free" ? "2 of 3 audits used · Resets Feb 1, 2025"
-                : user.plan === "pro" ? "Unlimited audits · Renews Feb 1, 2025"
-                  : "Unlimited audits + API · Renews Feb 1, 2025"}
+              {formatPlanAllowance(currentPlan)}
             </p>
-            {user.plan === "free" && (
-              <div className="w-64 h-2 bg-zinc-800 rounded-full mt-4 overflow-hidden">
-                <div className="h-full bg-indigo-600" style={{ width: "66%" }} />
-              </div>
-            )}
           </div>
-          {user.plan === "free" && (
-            <Button onClick={() => onUpgrade("pro")} size="lg" className="bg-indigo-600 hover:bg-indigo-700">
-              Upgrade Plan
+          {currentPlan.id === "free" && (
+            <Button size="lg" disabled title="Payments are not enabled yet">
+              Payments coming soon
             </Button>
           )}
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {SUBSCRIPTION_PLANS.map((plan) => (
-          <Card key={plan.id} className={`border-border bg-card ${user.plan === plan.id ? 'ring-2 ring-indigo-600' : ''}`}>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {PLAN_LIST.map((plan) => (
+          <Card key={plan.id} className={`border-border bg-card ${currentPlan.id === plan.id ? 'ring-2 ring-indigo-600' : ''}`}>
             <CardHeader>
               <CardTitle>{plan.name}</CardTitle>
-              <div className="text-3xl font-bold text-indigo-400 mt-2">{plan.price}</div>
+              <div className="flex items-baseline gap-1 mt-2">
+                <span className="text-3xl font-bold text-indigo-400">${plan.price}</span>
+                {plan.billingInterval && (
+                  <span className="text-muted-foreground text-sm">/{plan.billingInterval}</span>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              {user.plan === plan.id && (
+              {currentPlan.id === plan.id && (
                 <div className="inline-block bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-full text-[10px] uppercase font-bold tracking-wider px-3 py-1 mb-4">
                   Current Plan
                 </div>
               )}
               <ul className="space-y-3 text-sm text-muted-foreground">
-                {plan.features.map((f, i) => <li key={i} className="flex items-center gap-2"><CheckCircleIcon className="h-4 w-4 text-green-500" /> {f}</li>)}
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2">
+                    <CheckCircleIcon className="h-4 w-4 text-green-500 flex-shrink-0" /> {f}
+                  </li>
+                ))}
               </ul>
             </CardContent>
             <CardFooter>
-              {user.plan !== plan.id && plan.id !== "free" && (
-                <Button
-                  onClick={() => onUpgrade(plan.id as "pro" | "agency")}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700"
-                >
-                  Upgrade
+              {currentPlan.id !== plan.id && plan.id !== "free" && (
+                <Button className="w-full" disabled title="Payments are not enabled yet">
+                  Payments coming soon
                 </Button>
               )}
             </CardFooter>
@@ -74,45 +74,14 @@ export function SubscriptionTab({ user, onUpgrade }: SubscriptionTabProps) {
 
       <div>
         <h4 className="text-foreground font-semibold text-xl mb-4">Billing History</h4>
-        {user.plan === "free" ? (
-          <Card className="border-dashed border-border bg-transparent">
-            <CardContent className="p-12 text-center">
-              <Receipt className="mx-auto h-10 w-10 text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground text-sm">No payments yet</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="border-border bg-card overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-muted/50 text-muted-foreground text-xs uppercase tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4 font-semibold">Invoice</th>
-                    <th className="px-6 py-4 font-semibold">Date</th>
-                    <th className="px-6 py-4 font-semibold">Amount</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {MOCK_BILLING_HISTORY.map((row, i) => (
-                    <tr key={i} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-6 py-4 font-mono text-foreground">{row.id}</td>
-                      <td className="px-6 py-4 text-muted-foreground">{row.date}</td>
-                      <td className="px-6 py-4 text-foreground">{row.amount}</td>
-                      <td className="px-6 py-4"><span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-green-500" /> Paid</span></td>
-                      <td className="px-6 py-4">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-400 hover:text-indigo-300">
-                          <Download size={16} />
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        )}
+        <Card className="border-dashed border-border bg-transparent">
+          <CardContent className="p-12 text-center">
+            <Receipt className="mx-auto h-10 w-10 text-muted-foreground/30 mb-4" />
+            <p className="text-muted-foreground text-sm">
+              Billing will become available after payments are enabled.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

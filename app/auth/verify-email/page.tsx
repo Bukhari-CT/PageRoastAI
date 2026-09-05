@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useCallback, useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthAlert } from "@/components/auth/AuthAlert";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function VerifyEmailContent() {
     const searchParams = useSearchParams();
@@ -15,14 +17,9 @@ function VerifyEmailContent() {
     const [resendEmail, setResendEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "success" | "error">(token ? "idle" : "idle");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [resendMessage, setResendMessage] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (token) {
-            handleVerify(token);
-        }
-    }, [token]);
-
-    const handleVerify = async (vToken: string) => {
+    const handleVerify = useCallback(async (vToken: string) => {
         setVerifying(true);
         setStatus("idle");
         setErrorMessage(null);
@@ -35,13 +32,19 @@ function VerifyEmailContent() {
             } else {
                 setStatus("success");
             }
-        } catch (err: unknown) {
+        } catch {
             setStatus("error");
             setErrorMessage("An unexpected error occurred.");
         } finally {
             setVerifying(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (token) {
+            handleVerify(token);
+        }
+    }, [token, handleVerify]);
 
     const handleResend = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,6 +52,7 @@ function VerifyEmailContent() {
 
         setResending(true);
         setErrorMessage(null);
+        setResendMessage(null);
 
         try {
             const { error } = await authClient.sendVerificationEmail({ email: resendEmail });
@@ -56,9 +60,9 @@ function VerifyEmailContent() {
                 setErrorMessage(error.message || "Something went wrong.");
             } else {
                 setStatus("idle"); // reset state to show generic message
-                alert("Verification link resent! Please check your inbox.");
+                setResendMessage("Verification link resent! Please check your inbox.");
             }
-        } catch (err: unknown) {
+        } catch {
             setErrorMessage("An unexpected error occurred.");
         } finally {
             setResending(false);
@@ -68,12 +72,12 @@ function VerifyEmailContent() {
     if (verifying) {
         return (
             <AuthCard title="Verifying" description="Just a moment while we verify your email.">
-                <div className="flex flex-col items-center justify-center py-8">
-                    <svg className="w-8 h-8 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24">
+                <div className="flex flex-col items-center justify-center py-8" role="status" aria-live="polite">
+                    <svg className="w-8 h-8 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p className="mt-4 text-zinc-400">Please wait deeply while we roast your audit request...</p>
+                    <p className="mt-4 text-muted-foreground">Verifying your email address...</p>
                 </div>
             </AuthCard>
         );
@@ -84,12 +88,9 @@ function VerifyEmailContent() {
             <AuthCard title="Email Verified" description="Success! Your email has been verified.">
                 <AuthAlert type="success" message="Your email is now verified! You can now sign in to your account." />
                 <div className="mt-8">
-                    <Link
-                        href="/login"
-                        className="flex items-center justify-center w-full h-10 px-4 py-2 font-medium transition-all rounded-md bg-orange-600 text-zinc-100 hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                    >
-                        Sign in
-                    </Link>
+                    <Button asChild className="w-full bg-indigo-600 hover:bg-indigo-500 text-white">
+                        <Link href="/login">Sign in</Link>
+                    </Button>
                 </div>
             </AuthCard>
         );
@@ -106,33 +107,37 @@ function VerifyEmailContent() {
                         <AuthAlert type="error" message={errorMessage || "Verification link is invalid."} />
                     </div>
                 )}
+                {resendMessage && (
+                    <div className="mb-6">
+                        <AuthAlert type="success" message={resendMessage} />
+                    </div>
+                )}
 
-                <p className="text-sm text-zinc-400 mb-6 text-center">
-                    Enter your email to resend the verification link if you didn't receive it.
+                <p className="text-sm text-muted-foreground mb-6 text-center">
+                    Enter your email to resend the verification link if you didn&apos;t receive it.
                 </p>
 
                 <form onSubmit={handleResend} className="space-y-4">
-                    <div className="flex flex-col gap-1.5">
-                        <input
-                            type="email"
-                            required
-                            placeholder="john@example.com"
-                            value={resendEmail}
-                            onChange={(e) => setResendEmail(e.target.value)}
-                            className="flex w-full h-10 px-3 py-2 text-sm transition-colors border rounded-md bg-zinc-800 border-zinc-700 text-zinc-100 placeholder:text-zinc-500 hover:border-zinc-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        />
-                    </div>
+                    <Input
+                        type="email"
+                        required
+                        placeholder="john@example.com"
+                        aria-label="Email address"
+                        value={resendEmail}
+                        onChange={(e) => setResendEmail(e.target.value)}
+                        className="bg-background/50"
+                    />
 
-                    <button
+                    <Button
                         type="submit"
                         disabled={resending}
-                        className="flex items-center justify-center w-full h-10 mt-2 px-4 py-2 font-medium transition-all rounded-md bg-orange-600 text-zinc-100 hover:bg-orange-500 focus:outline-none disabled:opacity-50"
+                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white"
                     >
                         {resending ? "Sending..." : "Resend verification link"}
-                    </button>
+                    </Button>
 
                     <div className="text-center mt-4">
-                        <Link href="/login" className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors">
+                        <Link href="/login" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                             Back to login
                         </Link>
                     </div>
@@ -148,7 +153,7 @@ export default function VerifyEmailPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex items-center justify-center min-h-screen bg-zinc-950 text-zinc-400">
+                <div className="flex items-center justify-center min-h-screen bg-background text-muted-foreground">
                     Loading verification page...
                 </div>
             }

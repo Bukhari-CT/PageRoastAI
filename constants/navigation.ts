@@ -1,6 +1,5 @@
 import {
-  LayoutDashboard, Flame, Clock, CreditCard,
-  Users, Package, Settings,
+  LayoutDashboard, Flame, Clock, CreditCard, Settings,
 } from "lucide-react";
 import type { NavItem } from "@/types";
 
@@ -12,17 +11,13 @@ export const USER_NAV_ITEMS: NavItem[] = [
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
+// Admin surfaces beyond the overview shell are deliberately absent until they
+// can be backed by real queries — see AdminPortal.
 export const ADMIN_NAV_ITEMS: NavItem[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "users", label: "Users", icon: Users },
-  { id: "plans", label: "Plans", icon: Package },
-  { id: "settings", label: "Settings", icon: Settings },
 ];
 
 export const LANDING_NAV_LINKS = [
   "How It Works",
-  "Results",
-  "Showcase",
-  "Testimonials",
   "Pricing",
 ] as const;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { loginSchema, signupSchema, type LoginValues, type SignupValues } from "@/schemas/auth";
+import { signupSchema, type LoginValues, type SignupValues } from "@/schemas/auth";
 import { sanitizeCallbackUrl } from "@/lib/utils";
 
 /**
@@ -34,7 +34,7 @@ export function useLogin() {
             // Client-side redirect if callbackURL didn't already trigger it
             router.push(safeUrl);
             return { success: true };
-        } catch (err: unknown) {
+        } catch {
             setError("An unexpected error occurred. Please try again.");
             return { success: false };
         } finally {
@@ -49,7 +49,6 @@ export function useLogin() {
  * Hook for handling signup logic
  */
 export function useSignup() {
-    const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -78,14 +77,13 @@ export function useSignup() {
         }
 
         try {
-            // @ts-ignore - custom fields firstName/lastName are verified server-side
             const { error: authError } = await authClient.signUp.email({
                 email: values.email,
                 password: values.password,
                 name: `${values.firstName} ${values.lastName}`,
                 firstName: values.firstName,
                 lastName: values.lastName,
-            } as any);
+            });
 
             if (authError) {
                 setError(authError.message || "Something went wrong during signup.");
@@ -94,7 +92,7 @@ export function useSignup() {
 
             setSuccess(true);
             return { success: true };
-        } catch (err: unknown) {
+        } catch {
             setError("An unexpected error occurred. Please try again.");
             return { success: false };
         } finally {

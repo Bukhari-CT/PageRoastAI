@@ -2,10 +2,9 @@
 
 import { headers } from "next/headers";
 
-import bcrypt from "bcryptjs";
-
-import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
+import { accountService } from "@diContainer/Resolver";
+import { SetPasswordDto } from "@application/Account/AccountDto";
 
 export async function setPasswordAction(password: string) {
   try {
@@ -19,38 +18,14 @@ export async function setPasswordAction(password: string) {
 
     const { user } = session;
 
-    // Check if the user already has a credential account
-    const existingCredential = await prisma.account.findFirst({
-      where: {
-        userId: user.id,
-        providerId: "credential",
-      },
-    });
+    const result = await accountService.setPassword(
+      SetPasswordDto.create({ userId: user.id, email: user.email, password })
+    );
 
-    if (existingCredential) {
-      if (existingCredential.password) {
-        return { error: "Account already has a password set. Use change password instead." };
-      } else {
-         // Rare case: credential exists without password, update it
-         const hashedPassword = await bcrypt.hash(password, 10);
-         await prisma.account.update({
-           where: { id: existingCredential.id },
-           data: { password: hashedPassword },
-         });
-         return { error: null };
-      }
+    if (result.statusCode >= 400) {
+      const body = result.body as { message?: string };
+      return { error: body.message ?? "An unexpected error occurred while setting your password." };
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await prisma.account.create({
-      data: {
-        userId: user.id,
-        accountId: user.email,
-        providerId: "credential",
-        password: hashedPassword,
-      },
-    });
 
     return { error: null };
   } catch (error: any) {

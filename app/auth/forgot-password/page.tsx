@@ -41,7 +41,7 @@ export default function ForgotPasswordPage() {
                 setErrorMessage(error.message || "Something went wrong.");
             }
             setSubmitted(true);
-        } catch (err: unknown) {
+        } catch {
             setErrorMessage("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);
@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
                     </CardHeader>
                     <CardContent className="flex flex-col gap-4">
                         <p className="text-sm text-muted-foreground">
-                            If an account with that email exists, you'll receive a reset link shortly.
+                            If an account with that email exists, you&apos;ll receive a reset link shortly.
                         </p>
                         <Button onClick={() => router.push("/login")} className="w-full bg-indigo-600 hover:bg-indigo-500 text-white">
                             Back to Login

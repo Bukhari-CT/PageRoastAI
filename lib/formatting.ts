@@ -40,29 +40,20 @@ export function getGradeLabel(score: number): string {
 }
 
 export function getGradeColor(score: number): string {
-  if (score >= GRADE_THRESHOLD_EXCEPTIONAL) return "var(--success)";
-  if (score >= GRADE_THRESHOLD_GOOD) return "var(--accent)";
-  if (score >= GRADE_THRESHOLD_NEEDS_WORK) return "var(--warning)";
-  return "var(--danger)";
+  // Returned as plain hex (not var(--token)) so callers can safely append an
+  // alpha suffix, e.g. `${getGradeColor(score)}15` for a tinted background.
+  if (score >= GRADE_THRESHOLD_EXCEPTIONAL) return "#22C55E";
+  if (score >= GRADE_THRESHOLD_GOOD) return "#4F46E5";
+  if (score >= GRADE_THRESHOLD_NEEDS_WORK) return "#EAB308";
+  return "#EF4444";
 }
 
 // ─── Plan Badge Helpers ──────────────────────────────────────────────────────
 
 export function getPlanBadgeClass(plan: string): string {
-  switch (plan.toLowerCase()) {
-    case "agency":
-      return "bg-violet-600/20 text-violet-400";
-    case "pro":
-      return "bg-indigo-600/20 text-indigo-400";
-    default:
-      return "bg-zinc-800 text-zinc-400";
-  }
-}
-
-export function getStatusBadgeClass(status: string): string {
-  return status === "Active"
-    ? "bg-green-500/20 text-green-400 border-green-500/20"
-    : "bg-red-500/20 text-red-400 border-red-500/20";
+  return plan.toLowerCase() === "pro"
+    ? "bg-indigo-600/20 text-indigo-400"
+    : "bg-muted text-muted-foreground";
 }
 
 // ─── SVG Score Ring ──────────────────────────────────────────────────────────

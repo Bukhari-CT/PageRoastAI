@@ -4,7 +4,7 @@ import { LogOut } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import type { User, UserTab, AdminTab } from "@/types";
+import type { User } from "@/types";
 
 interface NavItem {
   id: string;
@@ -63,6 +63,7 @@ export function DashboardSidebar({ user, navItems, activeTab, onTabChange, onLog
             variant="ghost"
             size="icon"
             onClick={onLogout}
+            aria-label="Log out"
             className="text-muted-foreground hover:text-destructive group-data-[collapsible=icon]:hidden"
           >
             <LogOut className="h-4 w-4" />

@@ -1,20 +1,21 @@
-// /home/bukhari/work/PageRoastAI/lib/auth.ts
-
 import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
 import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma";
-import { sendEmail } from "@/lib/email";
-import { env } from "@/shared/config/env";
+import { typeOrmAdapter } from "@infrastructure/Auth/TypeOrmAdapter";
+import { AppDataSource } from "@database/DBConnection";
+import { sendEmail } from "@services/EmailService";
+import { env, isGoogleAuthConfigured } from "@/shared/config/env";
 
 /**
  * Better Auth configuration.
- * Uses core emailAndPassword and emailVerification settings (v1.x syntax).
+ *
+ * Brute-force protection uses Better Auth's built-in rate limiter rather than
+ * a custom lockout: the previous `before` hook read `failedPasswordAttempts`
+ * and `lockedUntil` columns that no code path ever wrote, so it could never
+ * actually lock an account. The rules below are enforced by the library on
+ * every request, with no schema or bookkeeping of our own.
  */
 export const auth = betterAuth({
-    database: prismaAdapter(prisma, {
-        provider: "postgresql",
-    }),
+    database: typeOrmAdapter(AppDataSource),
     user: {
         additionalFields: {
             firstName: { type: "string", required: true },
@@ -37,7 +38,6 @@ export const auth = betterAuth({
                  <p><a href="${url}">${url}</a></p>
                  <p>This link will expire in 1 hour.</p>`
             );
-            console.log("Password reset email sent to", user.email);
             if (result.error) {
                 throw new Error(`Failed to send reset email: ${result.error}`);
             }
@@ -61,60 +61,60 @@ export const auth = betterAuth({
                 `<p>Welcome to PageRoastAI! Please verify your email address by clicking the link below:</p>
                  <p><a href="${url}">${url}</a></p>`
             );
-            console.log("Verification email sent to", user.email);
             if (result.error) {
                 throw new Error(`Failed to send verification email: ${result.error}`);
             }
         },
     },
 
-    socialProviders: {
-        google: {
-            clientId: env.GOOGLE_CLIENT_ID as string,
-            clientSecret: env.GOOGLE_CLIENT_SECRET as string,
-            mapProfileToUser: (profile: any) => {
-                return {
-                    firstName: profile.given_name || profile.name?.split(" ")[0] || "User",
-                    lastName: profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
-                }
-            }
+    /**
+     * Rate limiting. Enabled in every environment (Better Auth only enables it
+     * in production by default) so the limits are exercised during development
+     * instead of first meeting real traffic in production.
+     *
+     * Storage is in-memory, which means limits are per server instance. That is
+     * a genuine improvement over no limit at all, but on a serverless target it
+     * is weaker than it looks — moving to "database" or a shared store is a
+     * deployment-phase task.
+     */
+    rateLimit: {
+        enabled: true,
+        window: 60,
+        max: 100,
+        customRules: {
+            "/sign-in/email": { window: 60, max: 5 },
+            "/sign-up/email": { window: 3600, max: 10 },
+            "/request-password-reset": { window: 3600, max: 5 },
+            "/reset-password": { window: 3600, max: 5 },
+            "/send-verification-email": { window: 3600, max: 5 },
+            "/change-password": { window: 3600, max: 10 },
         },
     },
-    hooks: {
-        // Use 'before' hook to intercept sign-in and check for account lockout
-        before: async (context: any) => {
-            const { request } = context;
-            // Added safety check for request to prevent crashes on internal calls
-            if (request && request.method === "POST" && request.url?.includes("/sign-in/email")) {
-                try {
-                    const clonedReq = request.clone();
-                    const body = await clonedReq.json();
-                    const email = body.email;
 
-                    if (email) {
-                        const user = await prisma.user.findUnique({
-                            where: { email },
-                            select: { failedPasswordAttempts: true, lockedUntil: true },
-                        });
-
-                        if (user && user.failedPasswordAttempts >= 5 && user.lockedUntil && user.lockedUntil > new Date()) {
-                            return {
-                                response: new Response(
-                                    JSON.stringify({ message: "Account locked. Try again later." }),
-                                    { status: 423, headers: { "Content-Type": "application/json" } }
-                                ),
-                            };
-                        }
-                    }
-                } catch (error) {
-                    // Skip check if body is not accessible or invalid
-                }
-            }
-        },
-    },
+    // Registered only when credentials exist, so an unconfigured deployment
+    // boots cleanly instead of warning on every request. The matching sign-in
+    // button is hidden via `isGoogleAuthConfigured`.
+    socialProviders: isGoogleAuthConfigured
+        ? {
+            google: {
+                clientId: env.GOOGLE_CLIENT_ID,
+                clientSecret: env.GOOGLE_CLIENT_SECRET,
+                mapProfileToUser: (profile: {
+                    given_name?: string;
+                    family_name?: string;
+                    name?: string;
+                }) => {
+                    return {
+                        firstName: profile.given_name || profile.name?.split(" ")[0] || "User",
+                        lastName: profile.family_name || profile.name?.split(" ").slice(1).join(" ") || "",
+                    };
+                },
+            },
+        }
+        : {},
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
-    trustedOrigins: [env.NEXT_PUBLIC_APP_URL as string],
+    trustedOrigins: [env.NEXT_PUBLIC_APP_URL],
 });
 
 export type Auth = typeof auth;
