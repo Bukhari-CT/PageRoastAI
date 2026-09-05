@@ -5,19 +5,22 @@ import {
   BetterAuthModelName,
 } from "./BetterAuthModelMap";
 import { buildWhere } from "./TypeOrmWhereBuilder";
+import { ensureDataSourceInitialized } from "@database/DBConnection";
 
 function isKnownModel(model: string): model is BetterAuthModelName {
   return model in BETTER_AUTH_MODEL_MAP;
 }
 
 async function getRepository(dataSource: DataSource, model: string) {
-  if (!dataSource.isInitialized) {
-    await dataSource.initialize();
-  }
   if (!isKnownModel(model)) {
     throw new Error(`Unknown Better Auth model: ${model}`);
   }
-  return dataSource.getRepository(BETTER_AUTH_MODEL_MAP[model]);
+  // Delegates to the shared initializer so concurrent auth calls during a cold
+  // start share one in-flight initialization. The previous inline
+  // `if (!isInitialized) await initialize()` let two callers race and open a
+  // second pool. Behaviour is otherwise unchanged.
+  const initialized = await ensureDataSourceInitialized(dataSource);
+  return initialized.getRepository(BETTER_AUTH_MODEL_MAP[model]);
 }
 
 export function typeOrmAdapter(dataSource: DataSource) {

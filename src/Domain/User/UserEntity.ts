@@ -8,10 +8,6 @@ export interface IUserEntity {
   image: string | null;
   isAdmin: boolean;
   package: string | null;
-  failedPasswordAttempts: number;
-  lockedUntil: Date | null;
-  resetToken: string | null;
-  resetTokenExpiresAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,10 +27,6 @@ export class UserEntity {
     this.image = body.image ?? null;
     this.isAdmin = body.isAdmin ?? false;
     this.package = body.package ?? null;
-    this.failedPasswordAttempts = body.failedPasswordAttempts ?? 0;
-    this.lockedUntil = body.lockedUntil ?? null;
-    this.resetToken = body.resetToken ?? null;
-    this.resetTokenExpiresAt = body.resetTokenExpiresAt ?? null;
     this.createdAt = body.createdAt as Date;
     this.updatedAt = body.updatedAt as Date;
   }

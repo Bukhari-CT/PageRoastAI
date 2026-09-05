@@ -37,19 +37,6 @@ export class UserModel {
   @Column({ type: "text", nullable: true })
   package!: string | null;
 
-  @Column({ type: "int", default: 0 })
-  failedPasswordAttempts!: number;
-
-  @Column({ type: "datetime", precision: 3, nullable: true })
-  lockedUntil!: Date | null;
-
-  @Index({ unique: true })
-  @Column({ type: "varchar", length: 255, nullable: true })
-  resetToken!: string | null;
-
-  @Column({ type: "datetime", precision: 3, nullable: true })
-  resetTokenExpiresAt!: Date | null;
-
   @CreateDateColumn({
     type: "datetime",
     precision: 3,

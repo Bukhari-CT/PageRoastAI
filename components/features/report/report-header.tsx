@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { getScoreBgColor, getScoreColor, getScoreBorderColor } from "@/lib/formatting";
+import { formatReportDate, getScoreBgColor, getScoreColor, getScoreBorderColor } from "@/lib/formatting";
 import type { AppView } from "@/types";
 import type { StoredReport } from "@services/ReportStore";
 
@@ -24,7 +24,7 @@ export function ReportHeader({ report, onNavigate }: ReportHeaderProps) {
       </div>
       <div className="text-center hidden md:block">
         <p className="text-foreground font-medium text-sm">{report.url}</p>
-        <p className="text-muted-foreground text-xs">Audited {report.date}</p>
+        <p className="text-muted-foreground text-xs">Audited {formatReportDate(report.createdAt)}</p>
       </div>
       <div className="flex items-center gap-3">
         <div className="text-xs font-semibold px-2 py-1 rounded" style={{

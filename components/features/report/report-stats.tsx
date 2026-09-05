@@ -1,7 +1,7 @@
 "use client";
 
 import { ScoreRing } from "@/components/features/report/score-ring";
-import { getGradeLabel, getGradeColor } from "@/lib/formatting";
+import { formatReportDate, getGradeLabel, getGradeColor } from "@/lib/formatting";
 import type { StoredReport } from "@services/ReportStore";
 
 interface ReportStatsProps {
@@ -43,7 +43,7 @@ export function ReportStats({ report }: ReportStatsProps) {
           { label: "Issues Found", value: String(report.criticalIssues.length) },
           { label: "Critical", value: String(criticalCount) },
           { label: "Warnings", value: String(warningCount) },
-          { label: "Audit Date", value: report.date },
+          { label: "Audit Date", value: formatReportDate(report.createdAt) },
         ].map((item, i, arr) => (
           <div
             key={i}

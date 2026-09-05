@@ -61,3 +61,24 @@ export function getPlanBadgeClass(plan: string): string {
 export function getScoreOffset(score: number, circumference: number): number {
   return circumference - (circumference * score) / 100;
 }
+
+// ─── Date Helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Formats a persisted timestamp for display.
+ *
+ * Pinned to en-US and UTC so a server-rendered date and its client hydration
+ * always agree — a locale- or timezone-dependent format produces a hydration
+ * mismatch whenever the two differ.
+ */
+export function formatReportDate(date: Date | string): string {
+  const value = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(value.getTime())) return "Unknown date";
+
+  return value.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}

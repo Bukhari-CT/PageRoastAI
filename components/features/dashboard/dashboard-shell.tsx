@@ -22,16 +22,23 @@ import { isValidUrl } from "@/lib/utils";
 import { roastUrlAction, type RoastActionResult } from "@/app/actions/roast.actions";
 import { resolvePlan } from "@/shared/config/plans";
 import { USER_NAV_ITEMS, ADMIN_NAV_ITEMS } from "@/constants";
-import type { AppView, User, UserTab } from "@/types";
+import type { AppView, AuditRow, User, UserTab } from "@/types";
 
 interface DashboardShellProps {
   user?: User;
+  /** Persisted audit history, loaded server-side in app/dashboard/page.tsx. */
+  history?: AuditRow[];
   onNavigate?: (view: AppView) => void;
   onLogout?: () => void;
   onUpdateUser?: (user: User) => void;
 }
 
-export function DashboardShell({ user: initialUser, onLogout: customLogout, onUpdateUser: customUpdateUser }: DashboardShellProps) {
+export function DashboardShell({
+  user: initialUser,
+  history = [],
+  onLogout: customLogout,
+  onUpdateUser: customUpdateUser,
+}: DashboardShellProps) {
   const router = useRouter();
 
   // Use server-provided user as the source of truth, but still support local state for UI updates
@@ -111,7 +118,12 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
           </header>
           <main className="p-8">
             {!isAdmin && userTab === "dashboard" && (
-              <OverviewTab user={user} onStartRoast={() => setUserTab("roast")} />
+              <OverviewTab
+                user={user}
+                history={history}
+                onStartRoast={() => setUserTab("roast")}
+                onViewHistory={() => setUserTab("history")}
+              />
             )}
             {!isAdmin && userTab === "roast" && (
               <RoastTab
@@ -133,9 +145,7 @@ export function DashboardShell({ user: initialUser, onLogout: customLogout, onUp
             {!isAdmin && userTab === "history" && (
               <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h1 className="text-3xl font-bold text-foreground mb-8">Audit History</h1>
-                {/* Audits are not persisted yet, so there is nothing truthful to
-                    list here. Populated from the database in a later phase. */}
-                <AuditTable rows={[]} />
+                <AuditTable rows={history} />
               </div>
             )}
             {!isAdmin && userTab === "subscription" && (

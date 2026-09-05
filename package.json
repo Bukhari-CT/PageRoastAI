@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "eslint .",
     "seed:admin": "tsx bin/SeedAdmin.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migration:generate": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:generate -d src/Infrastructure/Database/DataSourceCli.ts",
+    "migration:create": "tsx ./node_modules/typeorm/cli.js migration:create",
+    "migration:run": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:run -d src/Infrastructure/Database/DataSourceCli.ts",
+    "migration:revert": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:revert -d src/Infrastructure/Database/DataSourceCli.ts",
+    "migration:show": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:show -d src/Infrastructure/Database/DataSourceCli.ts",
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.21",

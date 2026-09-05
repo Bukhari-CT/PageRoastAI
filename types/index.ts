@@ -16,7 +16,7 @@ export type { PlanId, PlanConfig, ModelTier } from "@/shared/config/plans";
 
 // ─── Domain Models ───────────────────────────────────────────────────────────
 
-import type { PlanId } from "@/shared/config/plans";
+import type { ModelTier, PlanId } from "@/shared/config/plans";
 
 export interface User {
   name: string;
@@ -28,12 +28,14 @@ export interface User {
   auditsUsed?: number;
 }
 
-/** A row in the audit history table. Populated from the database in Phase 1. */
+/** A row in the audit history table, projected from a persisted report. */
 export interface AuditRow {
+  id: string;
   url: string;
   score: number;
-  issues: string;
-  date: string;
+  issues: number;
+  tier: ModelTier;
+  createdAt: Date;
 }
 
 // ─── UI Data Structures ──────────────────────────────────────────────────────

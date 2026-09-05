@@ -2,12 +2,19 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { DashboardShell } from "@/components/features/dashboard/dashboard-shell";
+import { listReportsForUser } from "@services/ReportStore";
 import { resolvePlan } from "@/shared/config/plans";
-import type { User, UserRole } from "@/types";
+import type { AuditRow, User, UserRole } from "@/types";
+
+/** How many audits the history tab shows before pagination becomes worthwhile. */
+const HISTORY_LIMIT = 20;
 
 /**
  * Dashboard Page - requires server-side session validation.
- * Features a comprehensive UI with audit history, subscription management, and admin tools.
+ *
+ * Audit history is loaded here rather than through a client fetch: the page is
+ * already a server component with the session in hand, so a second round trip
+ * and a new API surface would buy nothing.
  */
 export default async function DashboardPage() {
     const session = await auth.api.getSession({
@@ -30,5 +37,15 @@ export default async function DashboardPage() {
         plan: resolvePlan(authUser.package).id,
     };
 
-    return <DashboardShell user={dashboardUser} />;
+    const reports = await listReportsForUser(authUser.id, HISTORY_LIMIT);
+    const history: AuditRow[] = reports.map((report) => ({
+        id: report.id,
+        url: report.url,
+        score: report.score,
+        issues: report.criticalIssues.length,
+        tier: report.tier,
+        createdAt: report.createdAt,
+    }));
+
+    return <DashboardShell user={dashboardUser} history={history} />;
 }
