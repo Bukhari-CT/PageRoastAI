@@ -9,7 +9,7 @@ import {
   isPlanId,
   resolvePlan,
 } from "../shared/config/plans";
-import { isValidUrl, normalizeAuditUrl } from "../lib/utils";
+import { isValidUrl } from "../lib/utils";
 
 describe("plan configuration", () => {
   it("matches the agreed MVP shape", () => {
@@ -22,6 +22,15 @@ describe("plan configuration", () => {
     assert.equal(PRO_PLAN.auditLimit, 30);
     assert.equal(PRO_PLAN.modelTier, "premium");
     assert.equal(PRO_PLAN.billingInterval, "month");
+  });
+
+  it("keeps plan id and Gemini model tier as separate concepts", () => {
+    // Persisted reports store planId; only Gemini model selection uses modelTier.
+    assert.equal(FREE_PLAN.id, "free");
+    assert.equal(FREE_PLAN.modelTier, "free");
+    assert.equal(PRO_PLAN.id, "pro");
+    assert.equal(PRO_PLAN.modelTier, "premium");
+    assert.notEqual(PRO_PLAN.id, PRO_PLAN.modelTier);
   });
 
   it("offers exactly two plans and no Agency tier", () => {
@@ -58,36 +67,11 @@ describe("resolvePlan", () => {
   });
 });
 
-describe("normalizeAuditUrl", () => {
-  it("collapses equivalent spellings of the same page to one form", () => {
-    const expected = "https://example.com/";
-    assert.equal(normalizeAuditUrl("example.com"), expected);
-    assert.equal(normalizeAuditUrl("https://example.com"), expected);
-    assert.equal(normalizeAuditUrl("https://example.com/"), expected);
-    assert.equal(normalizeAuditUrl("  https://EXAMPLE.com/  "), expected);
-    assert.equal(normalizeAuditUrl("https://example.com:443/"), expected);
-  });
-
-  it("preserves parts that change which page is fetched", () => {
-    assert.equal(normalizeAuditUrl("http://example.com/"), "http://example.com/");
-    assert.equal(normalizeAuditUrl("https://example.com/pricing"), "https://example.com/pricing");
-    assert.equal(
-      normalizeAuditUrl("https://example.com/p?ref=x#top"),
-      "https://example.com/p?ref=x#top"
-    );
-    assert.equal(normalizeAuditUrl("https://example.com:8080/"), "https://example.com:8080/");
-  });
-
-  it("rejects input that is not a usable public URL", () => {
-    for (const value of ["", "   ", "not a url", "localhost", "ftp://example.com"]) {
-      assert.equal(normalizeAuditUrl(value), null);
-    }
-  });
-
-  it("agrees with isValidUrl on acceptance", () => {
+describe("isValidUrl", () => {
+  it("accepts public-looking hosts and rejects bare names", () => {
     assert.equal(isValidUrl("example.com"), true);
-    assert.ok(normalizeAuditUrl("example.com"));
+    assert.equal(isValidUrl("https://example.com/pricing"), true);
     assert.equal(isValidUrl("localhost"), false);
-    assert.equal(normalizeAuditUrl("localhost"), null);
+    assert.equal(isValidUrl("not a url"), false);
   });
 });

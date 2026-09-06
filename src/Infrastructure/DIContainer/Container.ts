@@ -5,6 +5,7 @@ import { SessionRepository } from "@repositories/SessionRepository";
 import { AccountRepository } from "@repositories/AccountRepository";
 import { VerificationRepository } from "@repositories/VerificationRepository";
 import { ReportRepository } from "@repositories/ReportRepository";
+import { AuditRunRepository } from "@repositories/AuditRunRepository";
 
 declare global {
   var __diContainerRegistered: boolean | undefined;
@@ -18,6 +19,7 @@ if (!globalThis.__diContainerRegistered) {
     useClass: VerificationRepository,
   });
   container.register("IReportRepository", { useClass: ReportRepository });
+  container.register("IAuditRunRepository", { useClass: AuditRunRepository });
   globalThis.__diContainerRegistered = true;
 }
 

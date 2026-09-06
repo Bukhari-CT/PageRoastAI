@@ -1,14 +1,14 @@
 import { injectable } from "tsyringe";
 import { ISessionRepository } from "@domain/Session/ISessionRepository";
-import type { SessionModel } from "@models/SessionModel";
+import { SessionSchema, type SessionRow } from "@models/SessionSchema";
 import { BaseRepository } from "./BaseRepository";
 
 @injectable()
 export class SessionRepository
-  extends BaseRepository<SessionModel>
+  extends BaseRepository<SessionRow>
   implements ISessionRepository
 {
   constructor() {
-    super("SessionModel");
+    super(SessionSchema);
   }
 }

@@ -1,16 +1,25 @@
+import { UserSchema } from "@models/UserSchema";
+import { SessionSchema } from "@models/SessionSchema";
+import { AccountSchema } from "@models/AccountSchema";
+import { VerificationSchema } from "@models/VerificationSchema";
+
 /**
- * Maps by entity NAME (TypeORM's metadata.name, matched by string) rather
- * than by class reference. Next.js can evaluate a Model file into more than
- * one module instance across different bundles (e.g. the instrumentation
- * hook vs. a route handler's own bundle), so a class reference captured in
- * one bundle can fail identity checks against DataSource metadata built in
- * another. String lookup sidesteps that entirely.
+ * Maps Better Auth's model names to TypeORM entities.
+ *
+ * These are the EntitySchema objects themselves, not name strings. TypeORM
+ * resolves an EntitySchema target directly, so there is no name lookup to get
+ * wrong and nothing here depends on a JavaScript class name surviving
+ * minification — which is what broke the production build before.
+ *
+ * This replaces two earlier attempts: class-name strings ("UserModel"), which
+ * the production minifier destroyed, and table-name strings ("users"), which
+ * fixed lookup but not TypeORM's internal identity. One mechanism now.
  */
 export const BETTER_AUTH_MODEL_MAP = {
-  user: "UserModel",
-  session: "SessionModel",
-  account: "AccountModel",
-  verification: "VerificationModel",
+  user: UserSchema,
+  session: SessionSchema,
+  account: AccountSchema,
+  verification: VerificationSchema,
 } as const;
 
 export type BetterAuthModelName = keyof typeof BETTER_AUTH_MODEL_MAP;

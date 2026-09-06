@@ -1,5 +1,5 @@
 import { roastResultSchema, type RoastResult } from "@/schemas/roast";
-import type { ModelTier } from "@/shared/config/plans";
+import { isPlanId, type PlanId } from "@/shared/config/plans";
 
 /**
  * The report shape the UI renders.
@@ -12,7 +12,7 @@ export interface StoredReport extends RoastResult {
   id: string;
   userId: string | null;
   url: string;
-  tier: ModelTier;
+  planId: PlanId;
   createdAt: Date;
 }
 
@@ -21,14 +21,10 @@ export interface ReportRowLike {
   id: string;
   userId: string | null;
   url: string;
-  tier: string;
+  planId: string;
   score: number;
   payload: unknown;
   createdAt: Date;
-}
-
-export function isModelTier(value: unknown): value is ModelTier {
-  return value === "free" || value === "premium";
 }
 
 /**
@@ -57,14 +53,15 @@ export function toStoredReport(row: ReportRowLike | null | undefined): StoredRep
   const parsed = roastResultSchema.safeParse(rawPayload);
   if (!parsed.success) return null;
 
-  if (!isModelTier(row.tier)) return null;
+  // Entitlement is never granted by an unvalidated string.
+  if (!isPlanId(row.planId)) return null;
 
   return {
     ...parsed.data,
     id: row.id,
     userId: row.userId ?? null,
     url: row.url,
-    tier: row.tier,
+    planId: row.planId,
     createdAt: row.createdAt,
   };
 }

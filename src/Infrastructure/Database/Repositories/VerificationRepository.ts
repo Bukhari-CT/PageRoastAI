@@ -1,14 +1,14 @@
 import { injectable } from "tsyringe";
 import { IVerificationRepository } from "@domain/Verification/IVerificationRepository";
-import type { VerificationModel } from "@models/VerificationModel";
+import { VerificationSchema, type VerificationRow } from "@models/VerificationSchema";
 import { BaseRepository } from "./BaseRepository";
 
 @injectable()
 export class VerificationRepository
-  extends BaseRepository<VerificationModel>
+  extends BaseRepository<VerificationRow>
   implements IVerificationRepository
 {
   constructor() {
-    super("VerificationModel");
+    super(VerificationSchema);
   }
 }

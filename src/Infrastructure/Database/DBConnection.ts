@@ -1,10 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { UserModel } from "./Models/UserModel";
-import { SessionModel } from "./Models/SessionModel";
-import { AccountModel } from "./Models/AccountModel";
-import { VerificationModel } from "./Models/VerificationModel";
-import { ReportModel } from "./Models/ReportModel";
+import { ENTITIES } from "./Entities";
 import {
   resolveConnectionLimit,
   resolveDriverExtra,
@@ -13,14 +9,6 @@ import {
   resolveSynchronize,
   shouldWarnAboutIgnoredSynchronize,
 } from "./DataSourceConfig";
-
-export const ENTITIES = [
-  UserModel,
-  SessionModel,
-  AccountModel,
-  VerificationModel,
-  ReportModel,
-];
 
 const buildDataSource = () => {
   if (shouldWarnAboutIgnoredSynchronize(process.env)) {

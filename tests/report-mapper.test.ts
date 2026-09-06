@@ -3,7 +3,6 @@ import { describe, it } from "node:test";
 
 import {
   canViewReport,
-  isModelTier,
   toStoredReport,
   type ReportRowLike,
 } from "../src/Application/Report/ReportMapper";
@@ -31,7 +30,7 @@ function row(overrides: Partial<ReportRowLike> = {}): ReportRowLike {
     id: "report-1",
     userId: "user-a",
     url: "https://example.com/",
-    tier: "premium",
+    planId: "pro",
     score: 42,
     payload: validPayload,
     createdAt: new Date("2026-09-06T10:00:00.000Z"),
@@ -47,7 +46,7 @@ describe("toStoredReport", () => {
     assert.equal(report.id, "report-1");
     assert.equal(report.userId, "user-a");
     assert.equal(report.url, "https://example.com/");
-    assert.equal(report.tier, "premium");
+    assert.equal(report.planId, "pro");
     assert.equal(report.score, 42);
     assert.equal(report.rewrittenHeroCopy, "Turn visitors into customers.");
     assert.equal(report.criticalIssues.length, 1);
@@ -67,9 +66,17 @@ describe("toStoredReport", () => {
     assert.equal(toStoredReport(row({ payload: null })), null);
   });
 
-  it("returns null for an unrecognised tier rather than trusting the string", () => {
-    assert.equal(toStoredReport(row({ tier: "agency" })), null);
-    assert.equal(toStoredReport(row({ tier: "" })), null);
+  it("stores the product plan, never the Gemini model tier", () => {
+    // "premium" is a model tier, not a plan. Persisting it would conflate two
+    // separate concepts, so it must be rejected like any other unknown value.
+    assert.equal(toStoredReport(row({ planId: "premium" })), null);
+    assert.equal(toStoredReport(row({ planId: "agency" })), null);
+    assert.equal(toStoredReport(row({ planId: "" })), null);
+  });
+
+  it("accepts both real plan ids", () => {
+    assert.equal(toStoredReport(row({ planId: "free" }))?.planId, "free");
+    assert.equal(toStoredReport(row({ planId: "pro" }))?.planId, "pro");
   });
 
   it("returns null for a missing row", () => {
@@ -81,16 +88,6 @@ describe("toStoredReport", () => {
     const report = toStoredReport(row({ userId: null }));
     assert.ok(report);
     assert.equal(report.userId, null);
-  });
-});
-
-describe("isModelTier", () => {
-  it("accepts only the two real model tiers", () => {
-    assert.equal(isModelTier("free"), true);
-    assert.equal(isModelTier("premium"), true);
-    assert.equal(isModelTier("pro"), false);
-    assert.equal(isModelTier("agency"), false);
-    assert.equal(isModelTier(undefined), false);
   });
 });
 

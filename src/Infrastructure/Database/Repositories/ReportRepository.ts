@@ -4,7 +4,7 @@ import type {
   IReportRepository,
   ReportHistoryOptions,
 } from "@domain/Report/IReportRepository";
-import type { ReportModel } from "@models/ReportModel";
+import { ReportSchema, type ReportRow } from "@models/ReportSchema";
 import { BaseRepository } from "./BaseRepository";
 
 /** Keeps an accidental `limit: 10000` from turning into a full table scan. */
@@ -13,17 +13,17 @@ export const DEFAULT_HISTORY_LIMIT = 20;
 
 @injectable()
 export class ReportRepository
-  extends BaseRepository<ReportModel>
+  extends BaseRepository<ReportRow>
   implements IReportRepository
 {
   constructor() {
-    super("ReportModel");
+    super(ReportSchema);
   }
 
   async findByUserId(
     userId: string,
     options: ReportHistoryOptions = {}
-  ): Promise<ReportModel[]> {
+  ): Promise<ReportRow[]> {
     const limit = Math.min(options.limit ?? DEFAULT_HISTORY_LIMIT, MAX_HISTORY_LIMIT);
     const offset = Math.max(options.offset ?? 0, 0);
 

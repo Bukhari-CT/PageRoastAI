@@ -3,10 +3,9 @@ import { DataSource } from "typeorm";
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
-import { UserModel } from "@models/UserModel";
-import { SessionModel } from "@models/SessionModel";
-import { AccountModel } from "@models/AccountModel";
-import { VerificationModel } from "@models/VerificationModel";
+import { ENTITIES } from "@database/Entities";
+import { UserSchema } from "@models/UserSchema";
+import { AccountSchema } from "@models/AccountSchema";
 import { generateId } from "@application/Shared/SharedUtils";
 
 /**
@@ -53,12 +52,12 @@ const CREDENTIAL_PROVIDER_ID = "credential";
 const seedDataSource = new DataSource({
   type: "mysql",
   url: process.env.DIRECT_URL || process.env.DATABASE_URL,
-  entities: [UserModel, SessionModel, AccountModel, VerificationModel],
+  entities: ENTITIES,
 });
 
 async function seedAdmin(email: string, password: string) {
-  const userRepository = seedDataSource.getRepository(UserModel);
-  const accountRepository = seedDataSource.getRepository(AccountModel);
+  const userRepository = seedDataSource.getRepository(UserSchema);
+  const accountRepository = seedDataSource.getRepository(AccountSchema);
   const hashedPassword = await bcrypt.hash(password, 10);
 
   let user = await userRepository.findOne({ where: { email } });

@@ -3,14 +3,17 @@
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Receipt, CheckCircle as CheckCircleIcon } from "lucide-react";
-import { PLAN_LIST, formatPlanAllowance, resolvePlan } from "@/shared/config/plans";
+import { PLAN_LIST, resolvePlan } from "@/shared/config/plans";
+import { formatUsage, usageResetNote } from "@/lib/formatting";
 import type { User } from "@/types";
+import type { AuditUsage } from "@application/Usage/AuditUsageTypes";
 
 interface SubscriptionTabProps {
   user: User;
+  usage: AuditUsage;
 }
 
-export function SubscriptionTab({ user }: SubscriptionTabProps) {
+export function SubscriptionTab({ user, usage }: SubscriptionTabProps) {
   const currentPlan = resolvePlan(user.plan);
 
   return (
@@ -23,9 +26,10 @@ export function SubscriptionTab({ user }: SubscriptionTabProps) {
           <div>
             <p className="text-muted-foreground text-xs uppercase tracking-wide mb-1">Current Plan</p>
             <p className="text-foreground font-bold text-2xl">{currentPlan.name}</p>
-            <p className="text-muted-foreground text-sm mt-1">
-              {formatPlanAllowance(currentPlan)}
-            </p>
+            <p className="text-muted-foreground text-sm mt-1">{formatUsage(usage)}</p>
+            {usageResetNote(usage) && (
+              <p className="text-muted-foreground text-xs mt-1">{usageResetNote(usage)}</p>
+            )}
           </div>
           {currentPlan.id === "free" && (
             <Button size="lg" disabled title="Payments are not enabled yet">

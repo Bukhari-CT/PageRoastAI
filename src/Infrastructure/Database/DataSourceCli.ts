@@ -1,10 +1,6 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import { UserModel } from "./Models/UserModel";
-import { SessionModel } from "./Models/SessionModel";
-import { AccountModel } from "./Models/AccountModel";
-import { VerificationModel } from "./Models/VerificationModel";
-import { ReportModel } from "./Models/ReportModel";
+import { ENTITIES } from "./Entities";
 import { resolveSsl } from "./DataSourceConfig";
 
 /**
@@ -29,9 +25,11 @@ export const CliDataSource = new DataSource({
   // Migrations run against the same managed database as the app, so they need
   // the same TLS setting.
   ssl: resolveSsl(process.env),
-  entities: [UserModel, SessionModel, AccountModel, VerificationModel, ReportModel],
+  // Same entity definitions as the application DataSource — one source of truth.
+  entities: ENTITIES,
   migrations: ["src/Infrastructure/Database/Migrations/*.ts"],
   migrationsTableName: "migrations",
 });
 
-export default CliDataSource;
+// Exactly one DataSource export: the TypeORM CLI rejects a file that exports
+// the same instance twice (e.g. named plus default).

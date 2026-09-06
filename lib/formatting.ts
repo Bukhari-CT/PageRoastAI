@@ -5,6 +5,7 @@ import {
   GRADE_THRESHOLD_GOOD,
   GRADE_THRESHOLD_NEEDS_WORK,
 } from "@/constants";
+import type { AuditUsage } from "@application/Usage/AuditUsageTypes";
 
 // ─── Score Helpers ───────────────────────────────────────────────────────────
 
@@ -81,4 +82,30 @@ export function formatReportDate(date: Date | string): string {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+// ─── Usage Helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Renders real audit usage, e.g. "0 of 1 audit used" or
+ * "7 of 30 audits used this month". Reads only what the usage service computed;
+ * it never derives or invents a count.
+ */
+export function formatUsage(usage: AuditUsage): string {
+  const noun = usage.limit === 1 ? "audit" : "audits";
+  const scope = usage.periodEnd ? " this month" : "";
+  return `${usage.used} of ${usage.limit} ${noun} used${scope}`;
+}
+
+/**
+ * Truthful reset copy, or null when there is nothing honest to say.
+ *
+ * Free is a lifetime allowance, so it never resets and no date is shown. Pro
+ * uses the real period boundary the usage service calculated — during Phase 2
+ * that is the next UTC calendar month; Phase 3 replaces it with the actual
+ * billing period without touching this function.
+ */
+export function usageResetNote(usage: AuditUsage): string | null {
+  if (!usage.periodEnd) return null;
+  return `Resets ${formatReportDate(usage.periodEnd)}`;
 }

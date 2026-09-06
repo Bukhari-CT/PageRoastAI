@@ -14,7 +14,8 @@
     "migration:run": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:run -d src/Infrastructure/Database/DataSourceCli.ts",
     "migration:revert": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:revert -d src/Infrastructure/Database/DataSourceCli.ts",
     "migration:show": "tsx --env-file-if-exists=.env ./node_modules/typeorm/cli.js migration:show -d src/Infrastructure/Database/DataSourceCli.ts",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx --env-file-if-exists=.env --test tests/integration/*.test.ts"
   },
   "dependencies": {
     "@better-fetch/fetch": "^1.1.21",
@@ -56,6 +57,7 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.6.0",
     "input-otp": "1.4.2",
+    "ipaddr.js": "^2.5.0",
     "lucide-react": "^0.564.0",
     "mysql2": "^3.24.2",
     "next": "16.2.0",

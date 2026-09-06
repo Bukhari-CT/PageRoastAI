@@ -1,12 +1,13 @@
 import type { RoastResult } from "@/schemas/roast";
-import type { ModelTier } from "@/shared/config/plans";
+import type { PlanId } from "@/shared/config/plans";
 
 export interface IReportEntity {
   id: string;
   /** Null only for legacy/anonymous audits; see ReportModel.userId. */
   userId: string | null;
   url: string;
-  tier: ModelTier;
+  /** Product plan the audit ran under. */
+  planId: PlanId;
   score: number;
   payload: RoastResult;
   createdAt: Date;
@@ -20,7 +21,7 @@ export class ReportEntity {
     this.id = body.id as string;
     this.userId = body.userId ?? null;
     this.url = body.url as string;
-    this.tier = body.tier as ModelTier;
+    this.planId = body.planId as PlanId;
     this.score = body.score as number;
     this.payload = body.payload as RoastResult;
     this.createdAt = body.createdAt as Date;

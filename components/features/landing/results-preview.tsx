@@ -6,10 +6,10 @@ import { ScoreRing } from "@/components/features/report/score-ring";
 import { Button } from "@/components/ui/button";
 import { useClipboard } from "@/hooks/useClipboard";
 import { SCORE_THRESHOLD_GOOD, SCORE_THRESHOLD_MEDIUM } from "@/constants";
-import { PRO_PLAN, formatPlanAllowance, formatPlanPrice } from "@/shared/config/plans";
+import { PRO_PLAN, formatPlanAllowance, formatPlanPrice, resolvePlan } from "@/shared/config/plans";
 import { formatReportDate } from "@/lib/formatting";
 import type { AppView } from "@/types";
-import type { RoastActionResult } from "@/app/actions/roast.actions";
+import type { StoredReport } from "@services/ReportStore";
 
 function scoreBarColor(score: number): string {
   if (score >= SCORE_THRESHOLD_GOOD) return "bg-green-500";
@@ -22,7 +22,7 @@ function severityBadgeClass(severity: "CRITICAL" | "WARNING" | "HIGH"): string {
 }
 
 interface LandingResultsPreviewProps {
-  result: RoastActionResult;
+  result: StoredReport;
   onNavigate: (view: AppView) => void;
 }
 
@@ -170,7 +170,7 @@ export function LandingResultsPreview({ result, onNavigate }: LandingResultsPrev
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-foreground">Audit Intelligence Report</h3>
-                  <p className="text-muted-foreground text-xs font-mono uppercase tracking-widest mt-0.5">pageroast-ai · {result.tier} tier · {formatReportDate(result.createdAt)}</p>
+                  <p className="text-muted-foreground text-xs font-mono uppercase tracking-widest mt-0.5">pageroast-ai · {resolvePlan(result.planId).name} plan · {formatReportDate(result.createdAt)}</p>
                 </div>
               </div>
               <button 

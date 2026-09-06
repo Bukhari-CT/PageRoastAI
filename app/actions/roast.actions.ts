@@ -3,103 +3,206 @@
 import { headers } from "next/headers";
 
 import { auth } from "@/lib/auth";
-import { normalizeAuditUrl } from "@/lib/utils";
-import { fetchPageText } from "@services/PageFetcher";
+import { fetchPageText, PageFetchError } from "@services/PageFetcher";
+import { evaluateUrlPolicy } from "@services/Url/UrlPolicy";
 import { buildRoastPrompt } from "@services/LlmPrompts";
-import { generateRoastJson, type ModelTier } from "@services/LlmClient";
+import { generateRoast } from "@services/LlmClient";
 import { saveReport, type StoredReport } from "@services/ReportStore";
-import { roastResultSchema } from "@/schemas/roast";
-import { resolvePlan } from "@/shared/config/plans";
+import { auditRunRepository } from "@diContainer/Resolver";
+import { getAuditUsage } from "@application/Usage/AuditUsageService";
+import { resolvePlan, type PlanId } from "@/shared/config/plans";
 
-export type RoastActionResult = StoredReport;
+export interface RoastUsageSummary {
+  used: number;
+  limit: number;
+  remaining: number;
+  planId: PlanId;
+}
 
-/** Raised when the audit succeeded but could not be persisted. */
-class ReportPersistenceError extends Error {}
+/**
+ * Discriminated outcome of an audit attempt.
+ *
+ * Every rejection has its own case so the UI can say something true and
+ * specific. No variant carries a resolved IP, SQL text, provider body or API
+ * key — failures are categorised server-side and only the category crosses the
+ * boundary.
+ */
+export type RoastActionResult =
+  | { status: "success"; report: StoredReport; usage: RoastUsageSummary }
+  | { status: "auth_required" }
+  | { status: "invalid_url" }
+  | { status: "unsupported_url" }
+  | { status: "limit_reached"; usage: RoastUsageSummary }
+  | { status: "audit_in_progress" }
+  | { status: "page_unreachable" }
+  | { status: "unsupported_content" }
+  | { status: "analysis_failed" }
+  | { status: "persistence_failed" };
 
-export async function roastUrlAction(
-  rawUrl: string
-): Promise<{ data: RoastActionResult; error: null } | { data: null; error: string }> {
-  if (!rawUrl.trim()) {
-    return { data: null, error: "Please enter a URL to audit." };
+/** Structured, low-cardinality logging. Never tokens, cookies or page content. */
+function logAuditFailure(context: {
+  stage: string;
+  auditRunId?: string;
+  userRef?: string;
+  detail?: string;
+  startedAt: number;
+}) {
+  console.error("[audit] failed", {
+    stage: context.stage,
+    auditRunId: context.auditRunId,
+    // Abbreviated: enough to correlate with a row, not enough to identify.
+    user: context.userRef,
+    detail: context.detail,
+    durationMs: Date.now() - context.startedAt,
+  });
+}
+
+/**
+ * Runs one audit.
+ *
+ * Order is deliberate and the cheap checks come first:
+ *
+ *  1. Authenticate. An anonymous caller is rejected here — before any DNS
+ *     query, page fetch, model call, quota claim or database write.
+ *  2. Validate the URL locally. A typo must not burn a quota slot, and this
+ *     costs nothing, so it happens before the reservation.
+ *  3. Resolve the plan from the database session only.
+ *  4. Claim a quota slot atomically. Nothing expensive runs until this succeeds.
+ *  5..8. Fetch (SSRF-guarded), prompt, generate (bounded retry), validate.
+ *  9. Persist the report, then mark the run completed.
+ *
+ * Any failure after step 4 releases the slot, so a user is never charged for an
+ * audit that produced nothing.
+ */
+export async function roastUrlAction(rawUrl: string): Promise<RoastActionResult> {
+  const startedAt = Date.now();
+
+  // 1. Authentication — enforced here, in the server action itself. Client UI
+  //    is a convenience, never the gate.
+  const session = await auth.api.getSession({ headers: await headers() });
+  const sessionUser = session?.user as
+    | { id?: string; package?: string | null }
+    | undefined;
+
+  if (!sessionUser?.id) {
+    return { status: "auth_required" };
   }
 
-  // Single canonical form, stored exactly as fetched, so history doesn't
-  // accumulate three spellings of the same page.
-  const normalizedUrl = normalizeAuditUrl(rawUrl);
-  if (!normalizedUrl) {
-    return { data: null, error: "Enter a valid URL (e.g. https://example.com)" };
+  const userId = sessionUser.id;
+  const userRef = userId.slice(0, 8);
+
+  // 2. Cheap local URL validation before any quota is consumed.
+  const policy = evaluateUrlPolicy(rawUrl);
+  if (!policy.ok) {
+    return { status: policy.reason === "invalid_url" ? "invalid_url" : "unsupported_url" };
   }
+  const normalizedUrl = policy.url.toString();
+
+  // 3. Plan comes from the authenticated user's stored package and the canonical
+  //    plan config. Client state, request body and query string are never used.
+  const plan = resolvePlan(sessionUser.package);
+
+  // 4. Atomic quota claim.
+  const reservation = await auditRunRepository.reserveAudit({
+    userId,
+    planId: plan.id,
+    now: new Date(),
+  });
+
+  if (reservation.outcome === "audit_in_progress") {
+    return { status: "audit_in_progress" };
+  }
+
+  if (reservation.outcome === "limit_reached") {
+    return {
+      status: "limit_reached",
+      usage: {
+        used: reservation.used,
+        limit: reservation.limit,
+        remaining: Math.max(reservation.limit - reservation.used, 0),
+        planId: plan.id,
+      },
+    };
+  }
+
+  const { auditRunId } = reservation;
+
+  const releaseSlot = async (stage: string, detail?: string) => {
+    logAuditFailure({ stage, auditRunId, userRef, detail, startedAt });
+    try {
+      await auditRunRepository.markFailed(auditRunId, new Date());
+    } catch {
+      // The reservation expires on its own via reservedUntil, so a failed
+      // release degrades to a short delay rather than a stuck user.
+      console.error("[audit] could not release reservation", { auditRunId });
+    }
+  };
 
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    const sessionUser = session?.user as
-      | { id?: string; package?: string | null }
-      | undefined;
-
-    const plan = resolvePlan(sessionUser?.package);
-    const tier: ModelTier = plan.modelTier;
-
-    // Anonymous audits still work — Phase 2 makes authentication mandatory.
-    // Until then an unauthenticated audit is stored with a null owner and is
-    // therefore readable by nobody, which is the safe default.
-    const userId = sessionUser?.id ?? null;
-
-    const { title, text } = await fetchPageText(normalizedUrl);
-    const prompt = buildRoastPrompt({ url: normalizedUrl, pageTitle: title, pageText: text });
-    const rawJson = await generateRoastJson(prompt, tier);
-
-    let parsedJson: unknown;
+    // 5. SSRF-guarded fetch.
+    let page: Awaited<ReturnType<typeof fetchPageText>>;
     try {
-      parsedJson = JSON.parse(rawJson);
-    } catch {
-      throw new Error("Gemini returned invalid JSON.");
+      page = await fetchPageText(normalizedUrl);
+    } catch (error: unknown) {
+      const code = error instanceof PageFetchError ? error.code : "page_unreachable";
+      await releaseSlot("fetch", code);
+
+      if (code === "unsupported_content") return { status: "unsupported_content" };
+      if (code === "unsupported_url") return { status: "unsupported_url" };
+      if (code === "invalid_url") return { status: "invalid_url" };
+      return { status: "page_unreachable" };
     }
 
-    const parsed = roastResultSchema.safeParse(parsedJson);
-    if (!parsed.success) {
-      throw new Error(`Gemini response did not match the expected shape: ${parsed.error.message}`);
+    // 6-8. Prompt, generate, validate. Retry and schema checking live inside
+    //      the generator; unvalidated output can never reach us here.
+    const prompt = buildRoastPrompt({
+      url: normalizedUrl,
+      pageTitle: page.title,
+      pageText: page.text,
+    });
+
+    const generation = await generateRoast(prompt, plan.modelTier);
+    if (!generation.ok) {
+      await releaseSlot("generate", `${generation.reason} after ${generation.attempts} attempt(s)`);
+      return { status: "analysis_failed" };
     }
 
-    let record: StoredReport;
+    // 9. Persist, then mark the run completed. A failed write must never hand
+    //    the user a report id that resolves to nothing.
+    let report: StoredReport;
     try {
-      record = await saveReport({
+      report = await saveReport({
         url: normalizedUrl,
-        tier,
+        planId: plan.id,
         userId,
-        result: parsed.data,
+        result: generation.result,
       });
-    } catch (persistError: unknown) {
-      // Wrapped so the generic handler below cannot report a database failure
-      // as a model failure. A failed write must never return a report id that
-      // resolves to nothing.
-      const detail =
-        persistError instanceof Error ? persistError.message : String(persistError);
-      throw new ReportPersistenceError(detail);
+    } catch (error: unknown) {
+      await releaseSlot(
+        "persist",
+        error instanceof Error ? error.message.slice(0, 200) : "unknown"
+      );
+      return { status: "persistence_failed" };
     }
 
-    return { data: record, error: null };
-  } catch (error: unknown) {
-    if (error instanceof ReportPersistenceError) {
-      // Identifiers and the audited URL only — no credentials, tokens, SQL or
-      // report content.
-      console.error("[roast] Failed to persist report", {
-        url: normalizedUrl,
-        message: error.message,
-      });
-      return {
-        data: null,
-        error: "We couldn't save your audit. Please try again in a moment.",
-      };
-    }
+    await auditRunRepository.markCompleted(auditRunId, report.id, new Date());
 
-    console.error("[roast] Error generating roast:", error);
-    const message = error instanceof Error ? error.message : "Something went wrong.";
-    // Surface fetch/model failures with a clean, specific-enough message; keep it short for the UI.
+    const usage = await getAuditUsage(userId, plan.id);
     return {
-      data: null,
-      error: message.includes("Timed out") || message.includes("Could not reach") || message.includes("status")
-        ? "Couldn't load that page — check the URL and try again."
-        : "Something went wrong generating your roast. Please try again.",
+      status: "success",
+      report,
+      usage: {
+        used: usage.used,
+        limit: usage.limit,
+        remaining: usage.remaining,
+        planId: usage.planId,
+      },
     };
+  } catch (error: unknown) {
+    await releaseSlot(
+      "unexpected",
+      error instanceof Error ? error.message.slice(0, 200) : "unknown"
+    );
+    return { status: "analysis_failed" };
   }
 }

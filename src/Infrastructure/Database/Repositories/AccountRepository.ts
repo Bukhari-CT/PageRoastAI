@@ -1,14 +1,14 @@
 import { injectable } from "tsyringe";
 import { IAccountRepository } from "@domain/Account/IAccountRepository";
-import type { AccountModel } from "@models/AccountModel";
+import { AccountSchema, type AccountRow } from "@models/AccountSchema";
 import { BaseRepository } from "./BaseRepository";
 
 @injectable()
 export class AccountRepository
-  extends BaseRepository<AccountModel>
+  extends BaseRepository<AccountRow>
   implements IAccountRepository
 {
   constructor() {
-    super("AccountModel");
+    super(AccountSchema);
   }
 }

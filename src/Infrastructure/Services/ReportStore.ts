@@ -2,7 +2,7 @@ import 'server-only';
 import { randomUUID } from 'crypto';
 
 import type { RoastResult } from '@/schemas/roast';
-import type { ModelTier } from '@/shared/config/plans';
+import type { PlanId } from '@/shared/config/plans';
 import { reportRepository } from '@diContainer/Resolver';
 import {
   canViewReport,
@@ -17,7 +17,7 @@ export type { StoredReport };
 
 export interface NewReport {
   url: string;
-  tier: ModelTier;
+  planId: PlanId;
   userId: string | null;
   result: RoastResult;
 }
@@ -51,7 +51,7 @@ export async function saveReport(report: NewReport): Promise<StoredReport> {
     id,
     userId: report.userId,
     url: report.url,
-    tier: report.tier,
+    planId: report.planId,
     score: report.result.score,
     payload: report.result,
   });
@@ -61,7 +61,7 @@ export async function saveReport(report: NewReport): Promise<StoredReport> {
     id,
     userId: report.userId,
     url: report.url,
-    tier: report.tier,
+    planId: report.planId,
     // `create` returns the saved entity; createdAt is filled by the database
     // default, which TypeORM may not echo back on insert.
     createdAt: row.createdAt ?? new Date(),

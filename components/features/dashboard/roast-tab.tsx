@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScoreRing } from "@/components/features/report/score-ring";
 import { LoadingStepList } from "@/components/ui/loading-step-list";
-import { formatPlanAllowance, resolvePlan } from "@/shared/config/plans";
 import type { User } from "@/types";
-import type { RoastActionResult } from "@/app/actions/roast.actions";
+import type { StoredReport } from "@services/ReportStore";
+import type { AuditUsage } from "@application/Usage/AuditUsageTypes";
+import { formatUsage, usageResetNote } from "@/lib/formatting";
 
 interface RoastTabProps {
   user: User;
@@ -15,7 +16,8 @@ interface RoastTabProps {
   urlError: string;
   isLoading: boolean;
   showResults: boolean;
-  roastResult: RoastActionResult | null;
+  roastResult: StoredReport | null;
+  usage: AuditUsage;
   activeStep: number;
   completedSteps: number[];
   onAuditUrlChange: (val: string) => void;
@@ -32,6 +34,7 @@ export function RoastTab({
   isLoading,
   showResults,
   roastResult,
+  usage,
   activeStep,
   completedSteps,
   onAuditUrlChange,
@@ -49,16 +52,28 @@ export function RoastTab({
 
       <Card className="border-border bg-card shadow-xl overflow-hidden">
         <CardContent className="p-10">
-          {user.plan === "free" && (
-            <div className="mb-8 flex flex-wrap justify-between items-center gap-2 text-sm">
-              <p className="text-muted-foreground">
-                Free plan — {formatPlanAllowance(resolvePlan(user.plan))}
+          {/* Real, server-computed usage — never a static allowance string. */}
+          <div className="mb-8 space-y-2">
+            <div className="flex flex-wrap justify-between items-center gap-2 text-sm">
+              <p className={usage.remaining === 0 ? "text-destructive font-medium" : "text-muted-foreground"}>
+                {formatUsage(usage)}
               </p>
-              <Button variant="link" onClick={onUpgrade} className="text-indigo-400 p-0 h-auto text-xs">
-                See Pro
-              </Button>
+              {usage.planId === "free" && (
+                <Button variant="link" onClick={onUpgrade} className="text-indigo-400 p-0 h-auto text-xs">
+                  See Pro
+                </Button>
+              )}
             </div>
-          )}
+            <div className="bg-muted rounded-full h-2 overflow-hidden">
+              <div
+                className={usage.remaining === 0 ? "bg-destructive h-full" : "bg-indigo-600 h-full"}
+                style={{ width: `${Math.min((usage.used / Math.max(usage.limit, 1)) * 100, 100)}%` }}
+              />
+            </div>
+            {usageResetNote(usage) && (
+              <p className="text-muted-foreground text-xs">{usageResetNote(usage)}</p>
+            )}
+          </div>
 
           <div className="space-y-4">
             <div className="space-y-2">
@@ -79,10 +94,10 @@ export function RoastTab({
 
             <Button
               onClick={onRoast}
-              disabled={isLoading}
+              disabled={isLoading || usage.remaining === 0}
               className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-indigo-600 to-violet-600 hover:opacity-90 transition-all shadow-lg"
             >
-              {isLoading ? "Analyzing..." : "Roast This Page →"}
+              {isLoading ? "Analyzing..." : usage.remaining === 0 ? "No audits remaining" : "Roast This Page →"}
             </Button>
           </div>
 

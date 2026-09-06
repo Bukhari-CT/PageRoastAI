@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardSidebar } from "@/components/features/dashboard/dashboard-sidebar";
@@ -19,7 +19,10 @@ import { useLoadingSteps } from "@/hooks/useLoadingSteps";
 import { useLogout } from "@/hooks/useAuth";
 import { getPlanBadgeClass } from "@/lib/formatting";
 import { isValidUrl } from "@/lib/utils";
-import { roastUrlAction, type RoastActionResult } from "@/app/actions/roast.actions";
+import { roastUrlAction } from "@/app/actions/roast.actions";
+import { auditFailureMessage, takePendingAuditUrl } from "@/lib/auditFeedback";
+import type { StoredReport } from "@services/ReportStore";
+import type { AuditUsage } from "@application/Usage/AuditUsageTypes";
 import { resolvePlan } from "@/shared/config/plans";
 import { USER_NAV_ITEMS, ADMIN_NAV_ITEMS } from "@/constants";
 import type { AppView, AuditRow, User, UserTab } from "@/types";
@@ -28,6 +31,8 @@ interface DashboardShellProps {
   user?: User;
   /** Persisted audit history, loaded server-side in app/dashboard/page.tsx. */
   history?: AuditRow[];
+  /** Real usage, computed server-side by the usage service. */
+  usage: AuditUsage;
   onNavigate?: (view: AppView) => void;
   onLogout?: () => void;
   onUpdateUser?: (user: User) => void;
@@ -36,6 +41,7 @@ interface DashboardShellProps {
 export function DashboardShell({
   user: initialUser,
   history = [],
+  usage,
   onLogout: customLogout,
   onUpdateUser: customUpdateUser,
 }: DashboardShellProps) {
@@ -67,9 +73,20 @@ export function DashboardShell({
   const [urlError, setUrlError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [roastResult, setRoastResult] = useState<RoastActionResult | null>(null);
+  const [roastResult, setRoastResult] = useState<StoredReport | null>(null);
+  const [liveUsage, setLiveUsage] = useState<AuditUsage>(usage);
 
   const { activeStep, completedSteps } = useLoadingSteps(isLoading);
+
+  // A visitor who typed a URL before signing in gets it back here rather than
+  // having to remember it. Cleared on read, so it is offered only once.
+  useEffect(() => {
+    const pending = takePendingAuditUrl();
+    if (pending) {
+      setAuditUrl(pending);
+      setUserTab("roast");
+    }
+  }, []);
 
   const isAdmin = user.role === "admin";
   const navItems = isAdmin ? ADMIN_NAV_ITEMS : USER_NAV_ITEMS;
@@ -84,12 +101,25 @@ export function DashboardShell({
     setIsLoading(true);
     const result = await roastUrlAction(trimmed);
     setIsLoading(false);
-    if (result.error) {
-      setUrlError(result.error);
+
+    if (result.status === "success") {
+      setRoastResult(result.report);
+      setLiveUsage((current) => ({ ...current, ...result.usage }));
+      setShowResults(true);
       return;
     }
-    setRoastResult(result.data);
-    setShowResults(true);
+
+    if (result.status === "auth_required") {
+      // The session expired mid-visit; send them back through login.
+      router.push("/login?callbackUrl=%2Fdashboard");
+      return;
+    }
+
+    if (result.status === "limit_reached") {
+      setLiveUsage((current) => ({ ...current, ...result.usage }));
+    }
+
+    setUrlError(auditFailureMessage(result.status));
   }
 
   return (
@@ -121,6 +151,7 @@ export function DashboardShell({
               <OverviewTab
                 user={user}
                 history={history}
+                usage={liveUsage}
                 onStartRoast={() => setUserTab("roast")}
                 onViewHistory={() => setUserTab("history")}
               />
@@ -133,6 +164,7 @@ export function DashboardShell({
                 isLoading={isLoading}
                 showResults={showResults}
                 roastResult={roastResult}
+                usage={liveUsage}
                 activeStep={activeStep}
                 completedSteps={completedSteps}
                 onAuditUrlChange={(val) => { setAuditUrl(val); setUrlError(""); }}
@@ -149,7 +181,7 @@ export function DashboardShell({
               </div>
             )}
             {!isAdmin && userTab === "subscription" && (
-              <SubscriptionTab user={user} />
+              <SubscriptionTab user={user} usage={liveUsage} />
             )}
             {!isAdmin && userTab === "settings" && (
               <UserSettingsTab user={user} onUpdateUser={onUpdateUser} />

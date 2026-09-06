@@ -16,7 +16,7 @@ export type { PlanId, PlanConfig, ModelTier } from "@/shared/config/plans";
 
 // ─── Domain Models ───────────────────────────────────────────────────────────
 
-import type { ModelTier, PlanId } from "@/shared/config/plans";
+import type { PlanId } from "@/shared/config/plans";
 
 export interface User {
   name: string;
@@ -34,7 +34,7 @@ export interface AuditRow {
   url: string;
   score: number;
   issues: number;
-  tier: ModelTier;
+  planId: PlanId;
   createdAt: Date;
 }
 
